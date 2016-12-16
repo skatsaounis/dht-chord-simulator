@@ -10,11 +10,12 @@ void Options::parse(int argc, char** argv) try {
          "list", "join", "depart", "query", "insert", "delete"};
     ValuesConstraint<string> allowed_commands(commands);
     UnlabeledValueArg<string> command("command",
-        "Command to be executed by the Distributed Systems Emulator Daemon (dsemud)",
+        "Command to be executed by the Distributed Systems Emulator Daemon (dsemud).\n"
+        "Use 'dsemu help <command>' to see usage for each command.",
         true, "help", &allowed_commands, cmd);
     UnlabeledMultiArg<string> parameters("parameters",
-        "Parameters passed to the executed command",
-        false, "list of parameters", cmd, true);
+        "Parameters passed to the executed command.",
+        false, "parameters", cmd, true);
     cmd.parse(argc, argv);
     if (command.getValue() == "help") cmd.getOutput()->usage(cmd);
 }
