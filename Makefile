@@ -1,15 +1,11 @@
 CXX = g++
-CXXARGS = --std=c++11
-RM = rm
+CXXFLAGS = --std=c++11
+RM = @rm -f
 
-all: commands.o
-	$(CXX) $(CXXARGS) -c main.cpp -o main.o
-	$(CXX) $(CXXARGS) -c options.cpp -o options.o
-	$(CXX) $(CXXARGS) main.o options.o commands.o -o dsemu
+all: dsemu
 
-commands.o: commands.cpp
-	$(CXX) $(CXXARGS) -c commands.cpp -o commands.o
+dsemu: main.o commands.o options.o
+	$(CXX) $(CXXFLAGS) main.o options.o commands.o -o dsemu
 
 clean:
-	$(RM) *.o
-	$(RM) dsemu
+	$(RM) *.o dsemu
