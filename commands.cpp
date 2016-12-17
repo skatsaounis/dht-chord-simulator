@@ -30,7 +30,9 @@ Commands to_command_enum(string s) try {
 /// Get a vector with all the supported command names
 /// (sorted by enum id).
 vector<string> all_command_names(){
-    vector<string> names(command_enums.size());
+    static bool cached(false);
+    static vector<string> names(command_enums.size());
+    if (cached) return names;
     for (auto&& p: command_enums) names[static_cast<int>(p.second)] = p.first;
-    return names;
+    return (cached = true), names;
 }
