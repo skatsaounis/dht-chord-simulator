@@ -5,12 +5,14 @@ import sys
 import select
 
 from lib.middleware import receive_message, create_socket
+from lib.internode import dht_join, dht_depart
 
 # node.py [name] [prev_node] [next_node]
 if len(sys.argv) != 4 and len(sys.argv) != 2:
     print('usage: node.py name [prev_node, next_node]')
     sys.exit(2)
 
+node_name = sys.argv[1]
 listening_socket = create_socket(sys.argv[1], True)
 active_sockets = [listening_socket]
 
@@ -35,17 +37,23 @@ try:
             print('Got message: ' + str(request_data))
 
             # Get the json object
-            # Here we accept messages from daemon
             try:
                 message = receive_message(request_data)
                 sender = message['sender']
                 cmd = message['command']
                 args = message['args']
+                # Here we accept messages from daemon
                 if ready_socket == listening_socket:
                     if cmd == 'join':
                         print('Received join command from ' + sender)
+                        previous_socket, next_socket = dht_join(
+                            previous_socket, next_socket, args, node_name
+                        )
                     elif cmd == 'depart':
                         print('Received depart command from ' + sender)
+                        previous_socket, next_socket = dht_depart(
+                            previous_socket, next_socket, args, node_name
+                        )
                     elif cmd == 'insert':
                         print('Received insert command from ' + sender)
                     elif cmd == 'query':
