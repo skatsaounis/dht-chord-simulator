@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import socket
 import os
 import sys
 import select
@@ -8,15 +7,20 @@ import select
 from lib.middleware import receive_message, create_socket
 
 # node.py [name] [prev_node] [next_node]
-if len(sys.argv) != 4:
-    print('usage: node.py [name] [prev_node] [next_node]')
+if len(sys.argv) != 4 and len(sys.argv) != 2:
+    print('usage: node.py name [prev_node, next_node]')
     sys.exit(2)
 
-listening_socket = create_socket(sys.argv[1])
-previous_socket = create_socket(sys.argv[2])
-next_socket = create_socket(sys.argv[3])
+listening_socket = create_socket(sys.argv[1], True)
+active_sockets = [listening_socket]
 
-active_sockets = [listening_socket, previous_socket, next_socket]
+if len(sys.argv) == 4:
+    previous_socket = create_socket(sys.argv[2])
+    next_socket = create_socket(sys.argv[3])
+    active_sockets.append(previous_socket, next_socket)
+else:
+    previous_socket = listening_socket
+    next_socket = listening_socket
 
 try:
     while True:
@@ -66,12 +70,8 @@ except KeyboardInterrupt:
     print('Shutting down gracefully...')
 
     for active_socket in active_sockets:
-        active_socket.shutdown(socket.SHUT_RDWR)
         active_socket.close()
-    print('Sockets have been shutdown and closed')
-
+    print('Sockets have been closed')
     os.remove('/tmp/' + sys.argv[1])
-    os.remove('/tmp/' + sys.argv[2])
-    os.remove('/tmp/' + sys.argv[3])
-    print('Associated files have been deleted')
+    print('Listening token has been deleted successfuly')
     sys.exit(130)

@@ -1,5 +1,4 @@
 import socket
-import os
 import json
 
 
@@ -13,12 +12,11 @@ def send_message(message):
     return json_message
 
 
-def create_socket(socket_name):
+def create_socket(socket_name, init=False):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    try:
-        os.remove("/tmp/" + socket_name)
-    except OSError:
-        pass
-    s.bind("/tmp/" + socket_name)
-    s.listen(1)
+    if init:
+        s.bind("/tmp/" + socket_name)
+        s.listen(1)
+    else:
+        s.connect("/tmp/" + socket_name)
     return s
