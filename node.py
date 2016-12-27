@@ -6,6 +6,7 @@ import select
 
 from lib.middleware import receive_message, create_socket
 from lib.internode import dht_join, dht_depart
+from lib.daemonify import join_cmd, depart_cmd, list_cmd
 
 # node.py [name] [prev_node] [next_node]
 if len(sys.argv) != 4 and len(sys.argv) != 2:
@@ -45,26 +46,30 @@ try:
             try:
                 message = receive_message(request_data)
                 sender = message['sender']
-                cmd = message['command']
+                cmd = message['cmd']
                 args = message['args']
                 # Here we accept messages from daemon
-                if ready_socket == listening_socket:
-                    if cmd == 'join':
-                        print('Received join command from ' + sender)
-                    elif cmd == 'depart':
-                        print('Received depart command from ' + sender)
-                    elif cmd == 'insert':
-                        print('Received insert command from ' + sender)
-                    elif cmd == 'query':
-                        print('Received query command from ' + sender)
-                    elif cmd == 'delete':
-                        print('Received delete command from ' + sender)
-                    else:
-                        print('Received unknown response from ' + sender)
-                elif ready_socket == previous_socket:
-                    pass
-                elif ready_socket == next_socket:
-                    pass
+                if cmd == 'list-cmd':
+                    print('Received daemon list command')
+                    list_cmd(node)
+                elif cmd == 'join-cmd':
+                    print('Received daemon join command')
+                    join_cmd(previous_socket, next_socket, args, node)
+                # Here we accept internode messages
+                elif cmd == 'join':
+                    print('Received join command from ' + sender)
+                    dht_join(previous_socket, next_socket, args, node)
+                elif cmd == 'depart':
+                    print('Received depart command from ' + sender)
+                    depart_cmd(previous_socket, next_socket, args, node)
+                elif cmd == 'insert':
+                    print('Received insert command from ' + sender)
+                elif cmd == 'query':
+                    print('Received query command from ' + sender)
+                elif cmd == 'delete':
+                    print('Received delete command from ' + sender)
+                else:
+                    print('Received unknown response from ' + sender)
 
             except Exception as e:
                 print(e)
