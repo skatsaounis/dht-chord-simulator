@@ -7,7 +7,7 @@ def dht_send_keys(args, dictionary):
     return dictionary
 
 
-def dht_join(previous_socket, next_socket, args, node):
+def dht_join(args, node):
     cmd_type = args['type']
     if 'sender' in args:
         sender = args['sender']
@@ -119,10 +119,10 @@ def dht_join(previous_socket, next_socket, args, node):
         node['successor'] = node_id
     else:
         print('received unknown join type')
-    return (previous_socket, next_socket, node)
+    return node
 
 
-def dht_depart(previous_socket, next_socket, args, node):
+def dht_depart(args, node):
     cmd_type = args['type']
     if cmd_type == 'pred':
         node_id = args['node_id']
@@ -132,4 +132,4 @@ def dht_depart(previous_socket, next_socket, args, node):
         node['successor'] = node_id
     else:
         print('received unknown depart type')
-    return (previous_socket, next_socket, node)
+    return node

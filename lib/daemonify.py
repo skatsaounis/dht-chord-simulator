@@ -1,7 +1,7 @@
 from middleware import create_socket, send_message
 
 
-def join_cmd(previous_socket, next_socket, args, node):
+def join_cmd(args, node):
     socket_fd = args['socket_fd']
     join_find = {
         'cmd': 'join',
@@ -16,7 +16,7 @@ def join_cmd(previous_socket, next_socket, args, node):
     next_socket.sendall(send_message(join_find))
 
 
-def depart_cmd(previous_socket, next_socket, args, node):
+def depart_cmd(node):
     depart_pred = {
         'cmd': 'depart',
         'sender': node['n'],

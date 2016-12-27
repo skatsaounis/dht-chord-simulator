@@ -9,8 +9,8 @@ from lib.internode import dht_join, dht_depart
 from lib.daemonify import join_cmd, depart_cmd, list_cmd
 
 # node.py [name] [prev_node] [next_node]
-if len(sys.argv) != 4 and len(sys.argv) != 2:
-    print('usage: node.py name [prev_node, next_node]')
+if len(sys.argv) != 2:
+    print('usage: node.py name')
     sys.exit(2)
 
 node = {
@@ -21,14 +21,6 @@ node = {
 
 listening_socket = create_socket(sys.argv[1], True)
 active_sockets = [listening_socket]
-
-if len(sys.argv) == 4:
-    previous_socket = create_socket(sys.argv[2])
-    next_socket = create_socket(sys.argv[3])
-    active_sockets.append(previous_socket, next_socket)
-else:
-    previous_socket = None
-    next_socket = None
 
 try:
     while True:
@@ -54,10 +46,10 @@ try:
                     list_cmd(node)
                 elif cmd == 'join-cmd':
                     print('Received daemon join command')
-                    join_cmd(previous_socket, next_socket, args, node)
+                    join_cmd(args, node)
                 elif cmd == 'depart-cmd':
                     print('Received daemon depart command')
-                    depart_cmd(previous_socket, next_socket, args, node)
+                    depart_cmd(node)
                     print('Shutting down gracefully...')
                     for active_socket in active_sockets:
                         active_socket.close()
@@ -68,10 +60,10 @@ try:
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + sender)
-                    dht_join(previous_socket, next_socket, args, node)
+                    dht_join(args, node)
                 elif cmd == 'depart':
                     print('Received depart command from ' + sender)
-                    dht_depart(previous_socket, next_socket, args, node)
+                    dht_depart(args, node)
                 elif cmd == 'insert':
                     print('Received insert command from ' + sender)
                 elif cmd == 'query':
