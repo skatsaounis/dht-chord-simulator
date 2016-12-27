@@ -1,6 +1,7 @@
 #include "options.hpp"
 #include "commands.hpp"
 #include <tclap/CmdLine.h>
+#include <stdexcept>
 
 using namespace std;
 using namespace TCLAP;
@@ -24,6 +25,6 @@ void Options::parse(int argc, char** argv) try {
     _m_command = to_command_enum(command_arg.getValue());
     if (command() == Commands::Help) cmd.getOutput()->usage(cmd);
 }
-catch (const ArgException& e) {
-    throw;
+catch (const exception& e) {
+    throw_with_nested(runtime_error("While parsing command line parameters"));
 }
