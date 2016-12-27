@@ -11,7 +11,7 @@ Commands Options::command() {
 }
 
 void Options::parse(int argc, char** argv) try {
-    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1");
+    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", false);
     auto commands = all_command_names();
     ValuesConstraint<string> allowed_commands(commands);
     UnlabeledValueArg<string> command_arg("command",
@@ -19,11 +19,12 @@ void Options::parse(int argc, char** argv) try {
         "Use 'dsemu help <command>' to see usage for each command.",
         true, "help", &allowed_commands, cmd);
     UnlabeledMultiArg<string> parameter_args("parameters",
-        "Parameters passed to the executed command.",
+        "Parameters passed to the command to be executed.",
         false, "parameters", cmd, true);
     cmd.parse(argc, argv);
     _m_command = to_command_enum(command_arg.getValue());
-    if (command() == Commands::Help) cmd.getOutput()->usage(cmd);
+    if      (command() == Commands::Help) cmd.getOutput()->usage(cmd);
+    else if (command() == Commands::Version) cmd.getOutput()->version(cmd);
 }
 catch (const exception& e) {
     throw_with_nested(runtime_error("While parsing command line parameters"));

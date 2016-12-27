@@ -9,6 +9,7 @@
 enum class Commands
 {
     Help,
+    Version,
     Status,
     Start,
     Terminate,

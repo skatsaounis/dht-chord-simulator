@@ -9,6 +9,7 @@ using namespace std;
 
 static const unordered_map<string, Commands> command_enums{
     {"help",        Commands::Help},
+    {"version",     Commands::Version},
     {"status",      Commands::Status},
     {"start",       Commands::Start},
     {"terminate",   Commands::Terminate},
