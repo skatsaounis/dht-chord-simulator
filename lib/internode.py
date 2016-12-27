@@ -104,10 +104,10 @@ def dht_join(previous_socket, next_socket, args, node):
                     'node_id': node['n']
                 }
             }
-            sending_socket = create_socket(node['predecessor'])
+            sending_socket = create_socket(node['successor'])
             sending_socket.sendall(send_message(join_pred))
             sending_socket.close()
-            sending_socket = create_socket(node['successor'])
+            sending_socket = create_socket(node['predecessor'])
             sending_socket.sendall(send_message(join_succ))
             sending_socket.close()
 
