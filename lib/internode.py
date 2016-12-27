@@ -126,15 +126,9 @@ def dht_depart(previous_socket, next_socket, args, node):
     cmd_type = args['type']
     if cmd_type == 'pred':
         node_id = args['node_id']
-        if previous_socket:
-            previous_socket.close()
-        previous_socket = create_socket(node_id)
         node['predecessor'] = node_id
     elif cmd_type == 'succ':
         node_id = args['node_id']
-        if next_socket:
-            next_socket.close()
-        next_socket = create_socket(node_id)
         node['successor'] = node_id
     else:
         print('received unknown depart type')

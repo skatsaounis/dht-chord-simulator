@@ -55,13 +55,23 @@ try:
                 elif cmd == 'join-cmd':
                     print('Received daemon join command')
                     join_cmd(previous_socket, next_socket, args, node)
+                elif cmd == 'depart-cmd':
+                    print('Received daemon depart command')
+                    depart_cmd(previous_socket, next_socket, args, node)
+                    print('Shutting down gracefully...')
+                    for active_socket in active_sockets:
+                        active_socket.close()
+                    print('Sockets have been closed')
+                    os.remove('/tmp/' + sys.argv[1])
+                    print('Listening token has been deleted successfuly')
+                    sys.exit(0)
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + sender)
                     dht_join(previous_socket, next_socket, args, node)
                 elif cmd == 'depart':
                     print('Received depart command from ' + sender)
-                    depart_cmd(previous_socket, next_socket, args, node)
+                    dht_depart(previous_socket, next_socket, args, node)
                 elif cmd == 'insert':
                     print('Received insert command from ' + sender)
                 elif cmd == 'query':

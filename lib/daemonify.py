@@ -17,7 +17,28 @@ def join_cmd(previous_socket, next_socket, args, node):
 
 
 def depart_cmd(previous_socket, next_socket, args, node):
-    pass
+    depart_pred = {
+        'cmd': 'depart',
+        'sender': node['n'],
+        'args': {
+            'type': 'pred',
+            'node_id': node['predecessor']
+        }
+    }
+    depart_succ = {
+        'cmd': 'depart',
+        'sender': node['n'],
+        'args': {
+            'type': 'succ',
+            'node_id': node['successor']
+        }
+    }
+    sending_socket = create_socket(node['successor'])
+    sending_socket.sendall(send_message(depart_pred))
+    sending_socket.close()
+    sending_socket = create_socket(node['predecessor'])
+    sending_socket.sendall(send_message(depart_succ))
+    sending_socket.close()
 
 
 def list_cmd(node):
