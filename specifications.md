@@ -14,8 +14,9 @@
 
 # Node Methods
 
-- [ ] join(node_id:unsigned)
-- [ ] depart(node_id:unsigned)
+- [x] join(node_id:unsigned)
+- [x] depart(node_id:unsigned)
+- [ ] send_keys(node_id:unsigned, dictionary{key:value})
 - [ ] insert(key:string, value:string)
 - [ ] query(key:string): value:string
 - [ ] answer(value:string, node_id:unsigned)
@@ -24,11 +25,11 @@
 
 # Inter-Node communication methods
 
-- [ ] listen():interruptible or event_driven
-- [ ] create_socket(node_id:unsigned=null): socket_id:socket
+- [x] listen():interruptible or event_driven
+- [x] create_socket(node_id:unsigned=null): socket_id:socket
 
 # Definitions
 
-- message (size,sender,command,[args]): json
+- message (command,sender,[args]): json
 - node    (node_id, previous_node, next_node, listening_socket, dictionary{key:value})
 - daemon  (node_table:{node_id:socket_id}, command_list)
