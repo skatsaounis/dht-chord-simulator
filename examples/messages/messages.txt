@@ -1,0 +1,90 @@
+## Daemon Messages
+json_msg = {
+    'cmd': 'join-cmd',
+    'sender': 'daemon-socket-id',
+    'args': {
+        'socket_fd': '1'
+    }
+}
+
+json_msg = {
+    'cmd': 'depart-cmd',
+    'sender': 'daemon-socket-id',
+    'args': {}
+}
+
+json_msg = {
+    'cmd': 'list-cmd',
+    'sender': 'daemon-socket-id',
+    'args': {}
+}
+
+## Internode Messages
+
+join_pred = {
+    'cmd': 'join',
+    'sender': 1,
+    'args': {
+        'type': 'pred',
+        'node_id': 5
+    }
+}
+
+join_succ = {
+    'cmd': 'join',
+    'sender': 1,
+    'args': {
+        'type': 'succ',
+        'node_id': 5
+    }
+}
+
+depart_pred = {
+    'cmd': 'depart',
+    'sender': 1,
+    'args': {
+        'type': 'pred',
+        'node_id': 5
+    }
+}
+
+depart_succ = {
+    'cmd': 'depart',
+    'sender': 1,
+    'args': {
+        'type': 'succ',
+        'node_id': 5
+    }
+}
+
+join_find = {
+    'cmd': 'join',
+    'sender': 1,
+    'args': {
+        'type': 'find',
+        'node_id': 5,
+        'sender': 10
+    }
+}
+
+join_response = {
+    'cmd': 'join',
+    'sender': 1,
+    'args': {
+        'type': 'response',
+        'pre_id': 5,
+        'succ_id': 15,
+        'receiver': 10
+    }
+}
+
+send_keys = {
+    'cmd': 'send_keys',
+    'sender': 1,
+    'args': {
+        'keys': {
+            '1526': 'One For The Road',
+            '9879': 'R U Mine?'
+        }
+    }
+}

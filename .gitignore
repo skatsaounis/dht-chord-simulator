@@ -3,3 +3,7 @@
 tclap/
 *.o
 dsemu
+__init__.py
+*.pyc
+test.py
+test2.py
