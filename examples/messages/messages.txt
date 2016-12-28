@@ -79,12 +79,14 @@ join_response = {
 }
 
 send_keys = {
-    'cmd': 'send_keys',
-    'sender': 1,
+    'cmd': 'keys',
+    'sender': '1',
     'args': {
-        'keys': {
-            '1526': 'One For The Road',
-            '9879': 'R U Mine?'
+        'keys':  {
+            1: 'Ace of Spades',
+            2: 'The Scientist',
+            3: 'Way down we go',
+            4: 'Smells like teen spirit'
         }
     }
 }

@@ -16,10 +16,10 @@
 
 - [x] join(node_id:unsigned)
 - [x] depart(node_id:unsigned)
-- [ ] send_keys(node_id:unsigned, dictionary{key:value})
+- [x] send_keys(node_id:unsigned, dictionary{key:value})
 - [ ] insert(key:string, value:string)
 - [ ] query(key:string): value:string
-- [ ] answer(value:string, node_id:unsigned)
+- [x] answer(value:string, node_id:unsigned)
 - [ ] delete(key:string)
 - [ ] hash(key:string): value:unsigned (same with id, node_id)
 
