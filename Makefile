@@ -4,8 +4,8 @@ RM = @rm -f
 
 all: dsemu
 
-dsemu: main.o commands.o options.o
-	$(CXX) $(CXXFLAGS) main.o options.o commands.o -o dsemu
+dsemu: main.o commands.o options.o daemon.o
+	$(CXX) $(CXXFLAGS) $+ -o $@
 
 clean:
 	$(RM) *.o dsemu

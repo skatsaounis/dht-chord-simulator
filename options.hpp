@@ -1,5 +1,5 @@
-#ifndef _DSEMU_OPTIONS_HPP
-#define _DSEMU_OPTIONS_HPP
+#ifndef _DSEMU_OPTIONS_HPP_
+#define _DSEMU_OPTIONS_HPP_
 
 #include "commands.hpp"
 
@@ -12,4 +12,4 @@ public:
     void parse(int argc, char** argv);
 };
 
-#endif  // _DSEMU_OPTIONS_HPP
+#endif  // _DSEMU_OPTIONS_HPP_

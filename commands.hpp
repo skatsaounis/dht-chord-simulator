@@ -1,5 +1,5 @@
-#ifndef _DSEMU_COMMANDS_HPP
-#define _DSEMU_COMMANDS_HPP
+#ifndef _DSEMU_COMMANDS_HPP_
+#define _DSEMU_COMMANDS_HPP_
 
 #include <vector>
 #include <string>
@@ -25,4 +25,4 @@ enum class Commands
 Commands to_command_enum(std::string);
 std::vector<std::string> all_command_names();
 
-#endif
+#endif  // _DSEMU_COMMANDS_HPP_

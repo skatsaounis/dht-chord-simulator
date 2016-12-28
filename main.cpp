@@ -1,4 +1,5 @@
 #include "options.hpp"
+#include "daemon.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <string>
@@ -10,8 +11,15 @@ static void print_exception(const exception&, int level = 0);
 int main(int argc, char** argv) try {
     Options options;
     options.parse(argc, argv);
-    // switch(options.command()) {}
-    // ...
+    Daemon daemon;
+    switch (options.command()) {
+        case Commands::Help:
+        case Commands::Version:
+            // Handled by the options parser.
+            break;
+        default:
+            cerr << "Function not implemented" << endl;
+    }
 }
 catch (const exception& e) {
     cerr << "The program crashed:" << endl;  // TODO: Different message on daemon crash
