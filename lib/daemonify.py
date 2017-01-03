@@ -33,11 +33,21 @@ def depart_cmd(node):
             'node_id': node['successor']
         }
     }
+    send_keys = {
+        'cmd': 'keys',
+        'sender': node['n'],
+        'args': {
+            'keys': node['keys']
+        }
+    }
     sending_socket = create_socket(node['successor'])
     sending_socket.sendall(send_message(depart_pred))
     sending_socket.close()
     sending_socket = create_socket(node['predecessor'])
     sending_socket.sendall(send_message(depart_succ))
+    sending_socket.close()
+    sending_socket = create_socket(node['predecessor'])
+    sending_socket.sendall(send_message(send_keys))
     sending_socket.close()
 
 
@@ -48,3 +58,4 @@ def list_cmd(node):
     else:
         print('Previous node: ' + node['predecessor'])
         print('Next node: ' + node['successor'])
+    print('Current node keys: ' + str(node['keys']))

@@ -1,10 +1,30 @@
 from middleware import create_socket, send_message
 
 
-def dht_send_keys(args, dictionary):
-    keys = args['keys']
-    dictionary.append(keys)
-    return dictionary
+def dht_send_keys(node):
+    n_keys = {}
+    rem_keys = {}
+
+    for key, value in node['keys'].items():
+        if key >= node['successor']:
+            n_keys.update({key: value})
+        else:
+            rem_keys.update({key: value})
+
+    node['keys'] = rem_keys
+
+    send_keys = {
+        'cmd': 'keys',
+        'sender': node['n'],
+        'args': {
+            'keys': n_keys
+        }
+    }
+    sending_socket = create_socket(node['successor'])
+    sending_socket.sendall(send_message(send_keys))
+    sending_socket.close()
+
+    return node
 
 
 def dht_join(args, node):
@@ -117,6 +137,7 @@ def dht_join(args, node):
     elif cmd_type == 'succ':
         node_id = args['node_id']
         node['successor'] = node_id
+        node = dht_send_keys(node)
     else:
         print('received unknown join type')
     return node

@@ -16,7 +16,8 @@ if len(sys.argv) != 2:
 node = {
     'n': sys.argv[1],
     'successor': sys.argv[1],
-    'predecessor': sys.argv[1]
+    'predecessor': sys.argv[1],
+    'keys': {}
 }
 
 listening_socket = create_socket(sys.argv[1], True)
@@ -32,7 +33,7 @@ try:
             # Get the data
             conn, _ = ready_socket.accept()
             request_data = conn.recv(1024)
-            print('Got message: ' + str(request_data))
+            # print('Got message: ' + str(request_data))
 
             # Get the json object
             try:
@@ -49,7 +50,8 @@ try:
                     join_cmd(args, node)
                 elif cmd == 'depart-cmd':
                     print('Received daemon depart command')
-                    depart_cmd(node)
+                    if node['successor'] != node['n']:
+                        depart_cmd(node)
                     print('Shutting down gracefully...')
                     for active_socket in active_sockets:
                         active_socket.close()
@@ -64,6 +66,9 @@ try:
                 elif cmd == 'depart':
                     print('Received depart command from ' + sender)
                     dht_depart(args, node)
+                elif cmd == 'keys':
+                    print('Received keys from ' + sender)
+                    node['keys'].update(args['keys'])
                 elif cmd == 'insert':
                     print('Received insert command from ' + sender)
                 elif cmd == 'query':
