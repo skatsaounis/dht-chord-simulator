@@ -1,5 +1,5 @@
 #include "options.hpp"
-#include "daemon.hpp"
+#include "daemon-frontend.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef _DSEMU_DAEMON_HPP_
-#define _DSEMU_DAEMON_HPP_
+#ifndef _DSEMU_DAEMON_FRONTEND_HPP_
+#define _DSEMU_DAEMON_FRONTEND_HPP_
 
 class Daemon {
     void* _m_connection = nullptr;
@@ -16,4 +16,4 @@ public:
     void terminate();
 };
 
-#endif  // _DSEMU_DAEMON_HPP_
+#endif  // _DSEMU_DAEMON_FRONTEND_HPP_
