@@ -1,0 +1,11 @@
+[Unit]
+Description=Distributed Systems Emulator Daemon
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/usr/local/share/dsemu/startup.sh
+ExecStop=/usr/local/share/dsemu/shutdown.sh
+Type=OneShot
+RemainAfterExit=Yes

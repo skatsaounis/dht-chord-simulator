@@ -13,6 +13,9 @@ int main(int argc, char** argv) try {
     options.parse(argc, argv);
     Daemon daemon;
     switch (options.command()) {
+        //case Commands::Start:
+            //daemon.start();
+            //break;
         case Commands::Help:
         case Commands::Version:
             // Handled by the options parser.

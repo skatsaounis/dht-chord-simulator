@@ -10,6 +10,10 @@ class Daemon {
 public:
     Daemon();
     ~Daemon();
+
+    bool isRunning();
+    void start();
+    void terminate();
 };
 
 #endif  // _DSEMU_DAEMON_HPP_
