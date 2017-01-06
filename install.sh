@@ -20,10 +20,16 @@ if [ -f /usr/bin/dsemu ]; then
 fi
 
 # Install startup scripts
-if [ -d /etc/systemd ]; then
+if [ -d /usr/lib/systemd/system ]; then
     cp ./startup-systemd.service /usr/lib/systemd/system/dsemu.service
     chown root:root /usr/lib/systemd/system/dsemu.service
     chmod u=rw,g=r,o=r /usr/lib/systemd/system/dsemu.service
+    systemctl enable dsemu.service
+    systemctl start dsemu.service
+elif [ -d /lib/systemd/system ]; then
+    cp ./startup-systemd.service /lib/systemd/system/dsemu.service
+    chown root:root /lib/systemd/system/dsemu.service
+    chmod u=rw,g=r,o=r /lib/systemd/system/dsemu.service
     systemctl enable dsemu.service
     systemctl start dsemu.service
 elif [ -d /etc/init.d ]; then

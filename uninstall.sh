@@ -23,10 +23,14 @@ if [ $(getent group dsemu) ]; then
 fi
 
 # Uninstall startup scripts
-if [ -d /etc/systemd ]; then
+if [ -f /usr/lib/systemd/system/dsemu.service ]; then
     systemctl stop dsemu.service
     systemctl disable dsemu.service
     rm /usr/lib/systemd/system/dsemu.service
+elif [ -f /lib/systemd/system/dsemu.service ]; then
+    systemctl stop dsemu.service
+    systemctl disable dsemu.service
+    rm /lib/systemd/system/dsemu.service
 elif [ -d /etc/init.d ]; then
     service dsemu stop
     chkconfig --del dsemu
