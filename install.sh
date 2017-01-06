@@ -49,16 +49,18 @@ useradd -rg dsemu dsemu
 
 # Install application binary executable
 cp ./dsemu /usr/local/bin/dsemu
-chown root:root /usr/local/bin/dsemu
-chmod u=rwx,g=rx,o=rx /usr/local/bin/dsemu
+chown root:dsemu /usr/local/bin/dsemu
+chmod u=rwx,g=rs,o=rx /usr/local/bin/dsemu
 
 # Install program files for the application
 mkdir /usr/local/share/dsemu
 chown root:root /usr/local/share/dsemu
 chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu
 cp *.py /usr/local/share/dsemu/
+chown root:dsemu /usr/local/share/dsemu/*.py
 cp ./startup.sh /usr/local/share/dsemu/
-chown root:root /usr/local/share/dsemu/*
+cp ./shutdown.sh /usr/local/share/dsemu/
+chown root:root /usr/local/share/dsemu/*.sh
 chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu/*
 
 echo "Installation complete."

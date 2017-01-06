@@ -1,4 +1,5 @@
 #include "daemon-frontend.hpp"
+#include "daemon_main.hpp"
 #include <stdexcept>
 
 using namespace std;
@@ -40,4 +41,16 @@ Daemon::~Daemon() try {
     _disconnect();
 } catch(const exception&) {
     throw_with_nested(runtime_error("While destructing Daemon abstraction"));
+}
+
+bool Daemon::isRunning() {
+    return false;  // TODO
+}
+
+void Daemon::start() {
+    daemon_main();
+}
+
+void Daemon::terminate() {
+    // TODO
 }

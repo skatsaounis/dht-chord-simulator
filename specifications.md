@@ -7,7 +7,7 @@
 - [ ] delete(key:string)
 - [ ] hash(key:string): value:unsigned (same with id, node_id)
 - [ ] status()
-- [ ] start()
+- [x] start()
 - [ ] terminate()
 - [ ] list_nodes()
 - [ ] list_commands()
