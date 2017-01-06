@@ -57,6 +57,8 @@ mkdir /usr/local/share/dsemu
 chown root:root /usr/local/share/dsemu
 chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu
 cp *.py /usr/local/share/dsemu/
+mkdir /usr/local/share/dsemu/lib
+cp lib/*.py /usr/local/share/dsemu/lib/
 chown root:dsemu /usr/local/share/dsemu/*.py
 cp ./startup.sh /usr/local/share/dsemu/
 cp ./shutdown.sh /usr/local/share/dsemu/

@@ -1,6 +1,7 @@
 #include "daemon_main.hpp"
 #include "globals.hpp"
 #include "utils.hpp"
+#include "daemon-backend.hpp"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -28,13 +29,15 @@ void daemon_main() try {
     saddr.sun_family = AF_UNIX;
     strncpy(saddr.sun_path, socket_path.c_str(), sizeof(saddr.sun_path) - 1);
 
-    ret = bind(sfd, (struct sockaddr*) &saddr, sizeof(struct sockaddr_un));
-    if (ret == -1) throw system_error(errno, system_category(), "Cannot bind initial socket to file.");
+    // ret = bind(sfd, (struct sockaddr*) &saddr, sizeof(struct sockaddr_un));
+    // if (ret == -1) throw system_error(errno, system_category(), "Cannot bind initial socket to file.");
 
-    ret = listen(sfd, 50);
-    if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
+    // ret = listen(sfd, 50);
+    // if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
 
     //main loop
+    Daemon daemon;
+    daemon.init_node(4, 42);
 
     shutdown(sfd, SHUT_RDWR);
     unlink(socket_path.c_str());

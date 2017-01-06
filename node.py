@@ -6,18 +6,19 @@ import select
 
 from lib.middleware import receive_message, create_socket
 from lib.internode import dht_join, dht_depart
-from lib.daemonify import join_cmd, depart_cmd, list_cmd
+from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd
 
 # node.py [name] [prev_node] [next_node]
-if len(sys.argv) != 2:
-    print('usage: node.py name')
+if len(sys.argv) != 3:
+    print('usage: node.py <name> <replica_factor>')
     sys.exit(2)
 
 node = {
     'n': sys.argv[1],
     'successor': sys.argv[1],
     'predecessor': sys.argv[1],
-    'keys': {}
+    'keys': {},
+    'replica_factor': sys.argv[2]
 }
 
 listening_socket = create_socket(sys.argv[1], True)
@@ -59,6 +60,9 @@ try:
                     os.remove('/tmp/' + sys.argv[1])
                     print('Listening token has been deleted successfuly')
                     sys.exit(0)
+                elif cmd == 'insert-cmd':
+                    print('Received daemon insert command')
+                    insert_cmd(args, node)
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + sender)

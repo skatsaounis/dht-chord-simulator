@@ -59,3 +59,16 @@ def list_cmd(node):
         print('Previous node: ' + node['predecessor'])
         print('Next node: ' + node['successor'])
     print('Current node keys: ' + str(node['keys']))
+
+
+def insert_cmd(args, node):
+    key = args['key']
+    insert_key = {
+        'cmd': 'insert',
+        'sender': node['n'],
+        'args': {
+            'key': key
+        }
+    }
+    next_socket = create_socket(socket_fd)
+    next_socket.sendall(send_message(insert_key))
