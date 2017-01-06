@@ -1,21 +1,31 @@
 #include "options.hpp"
 #include "daemon-frontend.hpp"
+#include "utils.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
-static void print_exception(const exception&, int level = 0);
-
 int main(int argc, char** argv) try {
     Options options;
     options.parse(argc, argv);
     Daemon daemon;
     switch (options.command()) {
-        //case Commands::Start:
-            //daemon.start();
-            //break;
+        case Commands::Status:
+            if (daemon.isRunning())
+                cout << "The daemon is running." << endl;
+            else
+                cout << "The daemon is not running." << endl;
+            break;
+        case Commands::Start:
+            if (!daemon.isRunning())
+                daemon.start();
+            break;
+        case Commands::Terminate:
+            if (daemon.isRunning())
+                daemon.terminate();
+            break;
         case Commands::Help:
         case Commands::Version:
             // Handled by the options parser.
@@ -25,14 +35,7 @@ int main(int argc, char** argv) try {
     }
 }
 catch (const exception& e) {
-    cerr << "The program crashed:" << endl;  // TODO: Different message on daemon crash
+    cerr << "The interface program crashed:" << endl;
     print_exception(e);
     exit(EXIT_FAILURE);
-}
-
-static void print_exception(const exception& e, int level) try {
-    cerr << string(level, ' ') << e.what() << endl;
-    rethrow_if_nested(e);
-} catch(const exception& e2) {
-    print_exception(e2, level + 1);
 }
