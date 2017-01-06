@@ -50,7 +50,7 @@ useradd -rg dsemu dsemu
 # Install application binary executable
 cp ./dsemu /usr/local/bin/dsemu
 chown root:dsemu /usr/local/bin/dsemu
-chmod u=rwx,g=rs,o=rx /usr/local/bin/dsemu
+chmod u=rwx,g=rx,o=rx /usr/local/bin/dsemu
 
 # Install program files for the application
 mkdir /usr/local/share/dsemu
