@@ -4,7 +4,7 @@ RM = @rm -f
 
 all: dsemu
 
-dsemu: main.o commands.o options.o daemon-frontend.o daemon_main.o globals.o utils.o daemon-backend.o
+dsemu: main.o commands.o options.o daemon-frontend.o daemon-main.o globals.o utils.o daemon-backend.o
 	$(CXX) $(CXXFLAGS) $+ -o $@
 
 clean:
