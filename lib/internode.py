@@ -17,7 +17,8 @@ def dht_send_keys(node):
         'cmd': 'keys',
         'sender': node['n'],
         'args': {
-            'keys': n_keys
+            'keys': n_keys,
+            'replica_counter': node['replica_factor'] - 1
         }
     }
     sending_socket = create_socket(node['successor'])
@@ -153,4 +154,28 @@ def dht_depart(args, node):
         node['successor'] = node_id
     else:
         print('received unknown depart type')
+    return node
+
+
+def dht_keys(args, node):
+    replica_counter = args['replica counter']
+    keys = args['keys']
+    node['keys'].update(keys)
+    if node['consistency'] == 'linear':
+        if replica_counter > 0:
+            send_keys = {
+                'cmd': 'keys',
+                'sender': node['n'],
+                'args': {
+                    'keys': keys,
+                    'replica_counter': replica_counter - 1
+                }
+            }
+            sending_socket = create_socket(node['successor'])
+            sending_socket.sendall(send_message(send_keys))
+            sending_socket.close()
+    elif node['consistency'] == 'eventual':
+        # TODO
+        pass
+
     return node

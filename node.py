@@ -5,7 +5,7 @@ import sys
 import select
 
 from lib.middleware import receive_message, create_socket
-from lib.internode import dht_join, dht_depart
+from lib.internode import dht_join, dht_depart, dht_keys
 from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd
 
 # node.py <name> <replica_factor> <consistency>
@@ -62,8 +62,8 @@ try:
                     print('Listening token has been deleted successfuly')
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
-                    print('Received daemon insert command')
-                    insert_cmd(args, node)
+                    print('Received insert key command')
+                    node = insert_cmd(args, node)
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + sender)
@@ -73,12 +73,12 @@ try:
                     dht_depart(args, node)
                 elif cmd == 'keys':
                     print('Received keys from ' + sender)
-                    node['keys'].update(args['keys'])
-                elif cmd == 'insert':
-                    print('Received insert command from ' + sender)
+                    node = dht_keys(args, node)
                 elif cmd == 'query':
+                    # TODO
                     print('Received query command from ' + sender)
                 elif cmd == 'delete':
+                    # TODO
                     print('Received delete command from ' + sender)
                 else:
                     print('Received unknown response from ' + sender)
