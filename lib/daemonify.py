@@ -63,6 +63,7 @@ def list_cmd(node):
 
 def insert_cmd(args, node):
     key = args['key']
+    socket_fd = args['socket_fd']
     insert_key = {
         'cmd': 'insert',
         'sender': node['n'],
