@@ -23,9 +23,8 @@ json_msg = {
     'cmd': 'insert-cmd',
     'sender': 'daemon-socket-id',
     'args': {
-        'key':  {
-            1: 'Ace of Spades',
-        }
+        'key': 4,
+        'value': 'Ace of Spades'
     }
 }
 

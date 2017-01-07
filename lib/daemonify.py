@@ -2,7 +2,7 @@ from middleware import create_socket, send_message
 
 
 def join_cmd(args, node):
-    socket_fd = args['socket_fd']
+    socket_fd = int(args['socket_fd'])
     join_find = {
         'cmd': 'join',
         'sender': node['n'],
@@ -53,21 +53,24 @@ def depart_cmd(node):
 
 
 def list_cmd(node):
-    print('Current node: ' + node['n'])
+    print('Current node: ' + str(node['n']))
     if node['n'] == node['predecessor']:
         print('No other node in the ring')
     else:
-        print('Previous node: ' + node['predecessor'])
-        print('Next node: ' + node['successor'])
+        print('Previous node: ' + str(node['predecessor']))
+        print('Next node: ' + str(node['successor']))
     print('Current node keys: ' + str(node['keys']))
+    print('Current node replica factor: ' + str(node['replica_factor']))
+    print('Current node consistency: ' + node['consistency'])
 
 
 def insert_cmd(args, node):
     key = args['key']
+    value = args['value']
 
-    if (node['name'] >= key) and (key > node['predecessor']):
+    if (node['n'] >= int(key)) and (int(key) > node['predecessor']):
         # write key to my keys
-        node['keys'].update(key)
+        node['keys'].update({key: value})
 
         # propagate replicas
         if node['replica_factor'] > 1:
@@ -76,7 +79,7 @@ def insert_cmd(args, node):
                     'cmd': 'keys',
                     'sender': node['n'],
                     'args': {
-                        'keys': key,
+                        'keys': {key: value},
                         'replica_counter': node['replica_factor'] - 1
                     }
                 }
@@ -95,6 +98,7 @@ def insert_cmd(args, node):
             'sender': node['n'],
             'args': {
                 'key': key,
+                'value': value,
             }
         }
         next_socket = create_socket(node['successor'])

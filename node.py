@@ -14,11 +14,11 @@ if len(sys.argv) != 4:
     sys.exit(2)
 
 node = {
-    'n': sys.argv[1],
-    'successor': sys.argv[1],
-    'predecessor': sys.argv[1],
+    'n': int(sys.argv[1]),
+    'successor': int(sys.argv[1]),
+    'predecessor': int(sys.argv[1]),
     'keys': {},
-    'replica_factor': sys.argv[2],
+    'replica_factor': int(sys.argv[2]),
     'consistency': sys.argv[3]
 }
 
@@ -66,22 +66,22 @@ try:
                     node = insert_cmd(args, node)
                 # Here we accept internode messages
                 elif cmd == 'join':
-                    print('Received join command from ' + sender)
+                    print('Received join command from ' + str(sender))
                     dht_join(args, node)
                 elif cmd == 'depart':
-                    print('Received depart command from ' + sender)
+                    print('Received depart command from ' + str(sender))
                     dht_depart(args, node)
                 elif cmd == 'keys':
-                    print('Received keys from ' + sender)
+                    print('Received keys from ' + str(sender))
                     node = dht_keys(args, node)
                 elif cmd == 'query':
                     # TODO
-                    print('Received query command from ' + sender)
+                    print('Received query command from ' + str(sender))
                 elif cmd == 'delete':
                     # TODO
-                    print('Received delete command from ' + sender)
+                    print('Received delete command from ' + str(sender))
                 else:
-                    print('Received unknown response from ' + sender)
+                    print('Received unknown response from ' + str(sender))
 
             except Exception as e:
                 print(e)
