@@ -8,9 +8,9 @@ from lib.middleware import receive_message, create_socket
 from lib.internode import dht_join, dht_depart
 from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd
 
-# node.py [name] [prev_node] [next_node]
-if len(sys.argv) != 3:
-    print('usage: node.py <name> <replica_factor>')
+# node.py <name> <replica_factor> <consistency>
+if len(sys.argv) != 4:
+    print('usage: node.py <name> <replica_factor> <consistency>')
     sys.exit(2)
 
 node = {
@@ -18,7 +18,8 @@ node = {
     'successor': sys.argv[1],
     'predecessor': sys.argv[1],
     'keys': {},
-    'replica_factor': sys.argv[2]
+    'replica_factor': sys.argv[2],
+    'consistency': sys.argv[3]
 }
 
 listening_socket = create_socket(sys.argv[1], True)
