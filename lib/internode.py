@@ -6,7 +6,11 @@ def dht_send_keys(node):
     rem_keys = {}
 
     for key, value in node['keys'].items():
-        if int(key) >= node['successor']:
+        if (
+            int(key) <= node['predecessor']
+        ) or (
+            int(key) > node['n']
+        ):
             n_keys.update({key: value})
         else:
             rem_keys.update({key: value})
@@ -134,10 +138,10 @@ def dht_join(args, node):
     elif cmd_type == 'pred':
         node_id = int(args['node_id'])
         node['predecessor'] = node_id
+        node = dht_send_keys(node)
     elif cmd_type == 'succ':
         node_id = int(args['node_id'])
         node['successor'] = node_id
-        node = dht_send_keys(node)
     else:
         print('received unknown join type')
     return node
