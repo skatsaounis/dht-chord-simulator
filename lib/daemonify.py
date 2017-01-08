@@ -68,7 +68,16 @@ def insert_cmd(args, node):
     key = args['key']
     value = args['value']
 
-    if (node['n'] >= int(key)) and (int(key) > node['predecessor']):
+    if (
+        node['n'] == int(key)
+    ) or (
+        node['n'] > int(key) and
+        int(key) > node['predecessor']
+    ) or (
+        node['n'] < node['predecessor'] and
+        node['n'] < int(key) and
+        int(key) > node['predecessor']
+    ):
         # write key to my keys
         node['keys'].update({key: value})
 
