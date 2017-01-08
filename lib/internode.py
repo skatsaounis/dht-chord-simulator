@@ -6,21 +6,25 @@ def dht_send_keys(node):
     rem_keys = {}
 
     for key, value in node['keys'].items():
-        if key >= node['successor']:
+        if (
+            int(key) <= node['predecessor']
+        ) or (
+            int(key) > node['n']
+        ):
             n_keys.update({key: value})
         else:
             rem_keys.update({key: value})
 
     node['keys'] = rem_keys
-
     send_keys = {
         'cmd': 'keys',
         'sender': node['n'],
         'args': {
-            'keys': n_keys
+            'keys': n_keys,
+            'replica_counter': node['replica_factor'] - 1
         }
     }
-    sending_socket = create_socket(node['successor'])
+    sending_socket = create_socket(node['predecessor'])
     sending_socket.sendall(send_message(send_keys))
     sending_socket.close()
 
@@ -32,7 +36,7 @@ def dht_join(args, node):
     if 'sender' in args:
         sender = args['sender']
     if cmd_type == 'find':
-        node_id = args['node_id']
+        node_id = int(args['node_id'])
         if node['successor'] == node['n']:
             join_response = {
                 'cmd': 'join',
@@ -47,21 +51,16 @@ def dht_join(args, node):
             sending_socket = create_socket(sender)
             sending_socket.sendall(send_message(join_response))
             sending_socket.close()
-        elif (node['successor'] < node['n']) and (node_id > node['n']):
-            join_response = {
-                'cmd': 'join',
-                'sender': node['n'],
-                'args': {
-                    'type': 'response',
-                    'pre_id': node['n'],
-                    'succ_id': node['successor'],
-                    'receiver': sender
-                }
-            }
-            sending_socket = create_socket(sender)
-            sending_socket.sendall(send_message(join_response))
-            sending_socket.close()
-        elif (node_id > node['n']) and (node_id <= node['successor']):
+        elif (
+            (
+                node['n'] < node_id and
+                node_id < node['successor'] and
+                node['n'] < node['successor']
+            ) or (
+                node['n'] > node['successor'] and
+                node_id < node['n']
+            )
+        ):
             join_response = {
                 'cmd': 'join',
                 'sender': node['n'],
@@ -90,7 +89,7 @@ def dht_join(args, node):
             sending_socket.close()
 
     elif cmd_type == 'response':
-        receiver = args['receiver']
+        receiver = int(args['receiver'])
         if receiver != node['n']:
             join_response = {
                 'cmd': 'join',
@@ -132,12 +131,12 @@ def dht_join(args, node):
             sending_socket.close()
 
     elif cmd_type == 'pred':
-        node_id = args['node_id']
+        node_id = int(args['node_id'])
         node['predecessor'] = node_id
-    elif cmd_type == 'succ':
-        node_id = args['node_id']
-        node['successor'] = node_id
         node = dht_send_keys(node)
+    elif cmd_type == 'succ':
+        node_id = int(args['node_id'])
+        node['successor'] = node_id
     else:
         print('received unknown join type')
     return node
@@ -146,11 +145,35 @@ def dht_join(args, node):
 def dht_depart(args, node):
     cmd_type = args['type']
     if cmd_type == 'pred':
-        node_id = args['node_id']
+        node_id = int(args['node_id'])
         node['predecessor'] = node_id
     elif cmd_type == 'succ':
-        node_id = args['node_id']
+        node_id = int(args['node_id'])
         node['successor'] = node_id
     else:
         print('received unknown depart type')
+    return node
+
+
+def dht_keys(args, node):
+    replica_counter = int(args['replica_counter'])
+    keys = args['keys']
+    node['keys'].update(keys)
+    if node['consistency'] == 'linear':
+        if replica_counter > 1:
+            send_keys = {
+                'cmd': 'keys',
+                'sender': node['n'],
+                'args': {
+                    'keys': keys,
+                    'replica_counter': replica_counter - 1
+                }
+            }
+            sending_socket = create_socket(node['successor'])
+            sending_socket.sendall(send_message(send_keys))
+            sending_socket.close()
+    elif node['consistency'] == 'eventual':
+        # TODO
+        pass
+
     return node

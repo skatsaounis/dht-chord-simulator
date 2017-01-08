@@ -37,7 +37,7 @@ void daemon_main() try {
 
     //main loop
     Daemon daemon;
-    daemon.init_node(4, 42);
+    daemon.init_node(4, 42, "linear");
 
     shutdown(sfd, SHUT_RDWR);
     unlink(socket_path.c_str());

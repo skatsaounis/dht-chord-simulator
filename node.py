@@ -5,20 +5,21 @@ import sys
 import select
 
 from lib.middleware import receive_message, create_socket
-from lib.internode import dht_join, dht_depart
-from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd
+from lib.internode import dht_join, dht_depart, dht_keys
+from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, query_cmd
 
-# node.py [name] [prev_node] [next_node]
-if len(sys.argv) != 3:
-    print('usage: node.py <name> <replica_factor>')
+# node.py <name> <replica_factor> <consistency>
+if len(sys.argv) != 4:
+    print('usage: node.py <name> <replica_factor> <consistency>')
     sys.exit(2)
 
 node = {
-    'n': sys.argv[1],
-    'successor': sys.argv[1],
-    'predecessor': sys.argv[1],
+    'n': int(sys.argv[1]),
+    'successor': int(sys.argv[1]),
+    'predecessor': int(sys.argv[1]),
     'keys': {},
-    'replica_factor': sys.argv[2]
+    'replica_factor': int(sys.argv[2]),
+    'consistency': sys.argv[3]
 }
 
 listening_socket = create_socket(sys.argv[1], True)
@@ -27,7 +28,7 @@ active_sockets = [listening_socket]
 try:
     while True:
         # Create a new connection
-        print('Listening for client requests...')
+        print("\n[node-%d] Listening for client requests..." % (node['n']))
         ready_sockets, _, _ = select.select(active_sockets, [], [])
 
         for ready_socket in ready_sockets:
@@ -61,26 +62,29 @@ try:
                     print('Listening token has been deleted successfuly')
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
-                    print('Received daemon insert command')
-                    insert_cmd(args, node)
+                    print('Received insert key command')
+                    node = insert_cmd(args, node)
+                elif cmd == 'query-cmd':
+                    print('Received daemon query command')
+                    query_cmd(args, node)
                 # Here we accept internode messages
                 elif cmd == 'join':
-                    print('Received join command from ' + sender)
+                    print('Received join command from ' + str(sender))
                     dht_join(args, node)
                 elif cmd == 'depart':
-                    print('Received depart command from ' + sender)
+                    print('Received depart command from ' + str(sender))
                     dht_depart(args, node)
                 elif cmd == 'keys':
-                    print('Received keys from ' + sender)
-                    node['keys'].update(args['keys'])
-                elif cmd == 'insert':
-                    print('Received insert command from ' + sender)
+                    print('Received keys from ' + str(sender))
+                    node = dht_keys(args, node)
                 elif cmd == 'query':
-                    print('Received query command from ' + sender)
+                    # TODO
+                    print('Received query command from ' + str(sender))
                 elif cmd == 'delete':
-                    print('Received delete command from ' + sender)
+                    # TODO
+                    print('Received delete command from ' + str(sender))
                 else:
-                    print('Received unknown response from ' + sender)
+                    print('Received unknown response from ' + str(sender))
 
             except Exception as e:
                 print(e)

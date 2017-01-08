@@ -15,8 +15,8 @@ def send_message(message):
 def create_socket(socket_name, init=False):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     if init:
-        s.bind("/tmp/" + socket_name)
+        s.bind("/tmp/" + str(socket_name))
         s.listen(1)
     else:
-        s.connect("/tmp/" + socket_name)
+        s.connect("/tmp/" + str(socket_name))
     return s
