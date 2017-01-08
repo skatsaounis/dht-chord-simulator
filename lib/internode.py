@@ -24,7 +24,7 @@ def dht_send_keys(node):
             'replica_counter': node['replica_factor'] - 1
         }
     }
-    sending_socket = create_socket(node['successor'])
+    sending_socket = create_socket(node['predecessor'])
     sending_socket.sendall(send_message(send_keys))
     sending_socket.close()
 
@@ -51,21 +51,16 @@ def dht_join(args, node):
             sending_socket = create_socket(sender)
             sending_socket.sendall(send_message(join_response))
             sending_socket.close()
-        elif (node['successor'] < node['n']) and (node_id > node['n']):
-            join_response = {
-                'cmd': 'join',
-                'sender': node['n'],
-                'args': {
-                    'type': 'response',
-                    'pre_id': node['n'],
-                    'succ_id': node['successor'],
-                    'receiver': sender
-                }
-            }
-            sending_socket = create_socket(sender)
-            sending_socket.sendall(send_message(join_response))
-            sending_socket.close()
-        elif (node_id > node['n']) and (node_id <= node['successor']):
+        elif (
+            (
+                node['n'] < node_id and
+                node_id < node['successor'] and
+                node['n'] < node['successor']
+            ) or (
+                node['n'] > node['successor'] and
+                node_id < node['n']
+            )
+        ):
             join_response = {
                 'cmd': 'join',
                 'sender': node['n'],

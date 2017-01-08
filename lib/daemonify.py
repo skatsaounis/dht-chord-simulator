@@ -47,7 +47,7 @@ def depart_cmd(node):
     sending_socket = create_socket(node['predecessor'])
     sending_socket.sendall(send_message(depart_succ))
     sending_socket.close()
-    sending_socket = create_socket(node['predecessor'])
+    sending_socket = create_socket(node['successor'])
     sending_socket.sendall(send_message(send_keys))
     sending_socket.close()
 
