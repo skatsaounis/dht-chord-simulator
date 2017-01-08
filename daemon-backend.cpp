@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void Daemon::init_node(unsigned node_id, unsigned replica_factor) try {
+void Daemon::init_node(unsigned node_id, unsigned replica_factor, const string& consistency) try {
     char command[31];
     strncpy(command, "/usr/local/share/dsemu/node.py", 30);
 
@@ -17,11 +17,14 @@ void Daemon::init_node(unsigned node_id, unsigned replica_factor) try {
     char arg_rep[6];
     strncpy(arg_rep, to_string(replica_factor).c_str(), 5);
 
+    char arg_cons[consistency.size() + 1];
+    strncpy(arg_cons, consistency.c_str(), consistency.size());
 
     char * newargv[] = { 
         command,
         arg_id,
         arg_rep,
+        arg_cons,
         NULL
     };
 

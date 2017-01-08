@@ -28,7 +28,7 @@ active_sockets = [listening_socket]
 try:
     while True:
         # Create a new connection
-        print('Listening for client requests...')
+        print("\n[node-%d] Listening for client requests..." % (node['n']))
         ready_sockets, _, _ = select.select(active_sockets, [], [])
 
         for ready_socket in ready_sockets:
