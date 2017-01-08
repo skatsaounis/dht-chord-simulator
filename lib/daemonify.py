@@ -57,11 +57,11 @@ def list_cmd(node):
     if node['n'] == node['predecessor']:
         print('No other node in the ring')
     else:
-        print('Previous node: ' + str(node['predecessor']))
         print('Next node: ' + str(node['successor']))
-    print('Current node keys: ' + str(node['keys']))
+        print('Previous node: ' + str(node['predecessor']))
     print('Current node replica factor: ' + str(node['replica_factor']))
     print('Current node consistency: ' + node['consistency'])
+    print('Current node keys: ' + str(node['keys']))
 
 
 def insert_cmd(args, node):
