@@ -106,3 +106,49 @@ def insert_cmd(args, node):
         next_socket.close()
 
     return node
+
+
+def query_cmd(args, node):
+    key = args['key']
+    sender = args['initial_sender']
+    replica_counter = int(args['replica_counter'])
+
+    if sender == 'daemon':
+        initial_sender = node['n']
+    else:
+        initial_sender = sender
+
+    if key in node['keys']:
+        if node['consistency'] == 'linear':
+            if replica_counter > 1:
+                query_key = {
+                    'cmd': 'query-cmd',
+                    'sender': node['n'],
+                    'args': {
+                        'initial_sender': initial_sender,
+                        'key': key,
+                        'replica_counter': replica_counter - 1
+                    }
+                }
+                next_socket = create_socket(node['successor'])
+                next_socket.sendall(send_message(query_key))
+                next_socket.close()
+            else:
+                # TODO -- send answer to initial sender
+                print(node['keys'][key])
+        elif node['consistency'] == 'eventual':
+            # TODO -- send answer to initial sender
+            print(node['keys'][key])
+    else:
+        query_key = {
+            'cmd': 'query-cmd',
+            'sender': node['n'],
+            'args': {
+                'initial_sender': initial_sender,
+                'key': key,
+                'replica_counter': replica_counter
+            }
+        }
+        next_socket = create_socket(node['successor'])
+        next_socket.sendall(send_message(query_key))
+        next_socket.close()

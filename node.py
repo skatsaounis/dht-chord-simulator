@@ -6,7 +6,7 @@ import select
 
 from lib.middleware import receive_message, create_socket
 from lib.internode import dht_join, dht_depart, dht_keys
-from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd
+from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, query_cmd
 
 # node.py <name> <replica_factor> <consistency>
 if len(sys.argv) != 4:
@@ -64,6 +64,9 @@ try:
                 elif cmd == 'insert-cmd':
                     print('Received insert key command')
                     node = insert_cmd(args, node)
+                elif cmd == 'query-cmd':
+                    print('Received daemon query command')
+                    query_cmd(args, node)
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + str(sender))
