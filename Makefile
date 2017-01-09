@@ -1,19 +1,20 @@
-CXX = g++
-CXXFLAGS = --std=c++11
+MV = @mv
 RM = @rm -f
+
+.PHONY: all clean install uninstall
 
 all: dsemu
 
-dsemu: main.o commands.o options.o daemon-frontend.o daemon-main.o globals.o utils.o daemon-backend.o
-	$(CXX) $(CXXFLAGS) $+ -o $@
+dsemu:
+	@$(MAKE) -C daemon/ dsemu
+	$(MV) daemon/dsemu ./
 
 clean:
-	$(RM) *.o dsemu
+	@$(MAKE) -C daemon/ clean
+	$(RM) dsemu
 
 install: dsemu
-	@chmod a+x ./install.sh
-	@sudo ./install.sh
+	@$(MAKE) -C scripts-install/ install
 
-uninstall: dsemu
-	@chmod a+x ./uninstall.sh
-	@sudo ./uninstall.sh
+uninstall:
+	@$(MAKE) -C scripts-install/ uninstall

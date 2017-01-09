@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+cd ..
+
 # Check if 'make' completed
 if [ ! -f ./dsemu ]; then
     echo "Please use 'make install' instead of this script.\n"
@@ -8,10 +10,8 @@ fi
 
 # Check whether the application is already installed
 if [ -f /usr/local/bin/dsemu ]; then
-    echo "Another instance of the application is already installed."
-    read -p "Remove (y/n)? " -n 1 -r; echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then exit 1; fi
-    ./uninstall.sh
+    echo "Another instance of the application is already installed. Use 'make uninstall'."
+    exit 1
 fi
 
 if [ -f /usr/bin/dsemu ]; then
@@ -20,20 +20,15 @@ if [ -f /usr/bin/dsemu ]; then
 fi
 
 # Install startup scripts
-if [ -d /usr/lib/systemd/system ]; then
-    cp ./startup-systemd.service /usr/lib/systemd/system/dsemu.service
+if [ -d /usr/lib/systemd ]; then
+    mkdir -pm 755 /usr/lib/systemd/system
+    cp ./scripts-install/startup-systemd.service /usr/lib/systemd/system/dsemu.service
     chown root:root /usr/lib/systemd/system/dsemu.service
     chmod u=rw,g=r,o=r /usr/lib/systemd/system/dsemu.service
     systemctl enable dsemu.service
     systemctl start dsemu.service
-elif [ -d /lib/systemd/system ]; then
-    cp ./startup-systemd.service /lib/systemd/system/dsemu.service
-    chown root:root /lib/systemd/system/dsemu.service
-    chmod u=rw,g=r,o=r /lib/systemd/system/dsemu.service
-    systemctl enable dsemu.service
-    systemctl start dsemu.service
 elif [ -d /etc/init.d ]; then
-    cp ./startup-initd.sh /etc/init.d/dsemu
+    cp ./scripts-install/startup-initd.sh /etc/init.d/dsemu
     chown root:root /etc/init.d/dsemu
     chmod u=rwx,g=rx,o=rx /etc/init.d/dsemu
     chkconfig --add dsemu
@@ -43,9 +38,8 @@ else
     exit 1
 fi
 
-# Add daemon user to the system
-groupadd -r dsemu
-useradd -rg dsemu dsemu
+# Add daemon user and group to the system
+useradd -rU dsemu
 
 # Install application binary executable
 cp ./dsemu /usr/local/bin/dsemu
@@ -53,16 +47,17 @@ chown root:dsemu /usr/local/bin/dsemu
 chmod u=rwx,g=rx,o=rx /usr/local/bin/dsemu
 
 # Install program files for the application
-mkdir /usr/local/share/dsemu
+mkdir -m 755 /usr/local/share/dsemu
 chown root:root /usr/local/share/dsemu
-chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu
 cp *.py /usr/local/share/dsemu/
 mkdir /usr/local/share/dsemu/lib
 cp lib/*.py /usr/local/share/dsemu/lib/
 chown root:dsemu /usr/local/share/dsemu/*.py
-cp ./startup.sh /usr/local/share/dsemu/
-cp ./shutdown.sh /usr/local/share/dsemu/
+chown root:dsemu /usr/local/share/dsemu/lib/*.py
+cp ./scripts-install/startup.sh /usr/local/share/dsemu/
+cp ./scripts-install/shutdown.sh /usr/local/share/dsemu/
 chown root:root /usr/local/share/dsemu/*.sh
 chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu/*
+chmod u=rwx,g=rx,o=rx /usr/local/share/dsemu/lib/*
 
 echo "Installation complete."
