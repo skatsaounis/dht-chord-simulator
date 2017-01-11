@@ -3,8 +3,15 @@
 
 #include <string>
 
-struct Daemon {
-    void init_node(unsigned node_id, unsigned replica_factor, const std::string& consistency);
+class Daemon {
+    bool _m_is_running = true;
+
+public:
+
+    bool is_running() const;
+
+    void terminate();
+    void init_node(const std::string& node_id, const std::string& replica_factor, const std::string& consistency);
 };
 
 #endif  // _DSEMU_DAEMON_BACKEND_HPP_
