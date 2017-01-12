@@ -63,6 +63,9 @@ void daemon_main() try {
         // Process request
         Commands cmd = to_command_enum(vars.at("cmd"));
         switch(cmd) {
+            case Commands::Status:
+                //TODO; (also in frontend)
+                break;
             case Commands::Start:
                 daemon.init_node(vars.at("node"), vars.at("replicas"), vars.at("consistency"));
                 break;
