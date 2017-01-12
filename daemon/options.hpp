@@ -5,10 +5,20 @@
 
 class Options
 {
+    enum class TargetTypes: unsigned {
+        None, Daemon, Node
+    };
+
     Commands _m_command;
+    unsigned _m_node;
+    TargetTypes _m_target_type = TargetTypes::None;
 
 public:
-    Commands command();
+    bool was_node_specified() const noexcept;
+
+    Commands command() const;
+    unsigned node() const;
+
     void parse(int argc, char** argv);
 };
 
