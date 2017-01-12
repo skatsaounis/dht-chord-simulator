@@ -5,4 +5,10 @@
 
 extern const std::string socket_path;
 
+enum class ConsistencyTypes {
+    Linear, Eventual
+};
+
+std::string to_string(ConsistencyTypes);
+
 #endif

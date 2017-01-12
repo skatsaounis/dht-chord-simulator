@@ -19,9 +19,14 @@ int main(int argc, char** argv) try {
                 cout << "The daemon is not running." << endl;
             break;
         case Commands::Start:
-            if (!daemon.isRunning())
-                daemon.start();
-            break;
+            if (options.was_node_specified()) {
+                // Initialize node
+                daemon.init_node(options.node(), options.n_replicas(), options.consistency());
+            } else {
+                // Start daemon
+                if (!daemon.isRunning())
+                    daemon.start();
+            } break;
         case Commands::Terminate:
             if (daemon.isRunning())
                 daemon.terminate();
