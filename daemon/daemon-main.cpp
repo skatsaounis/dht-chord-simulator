@@ -66,11 +66,17 @@ void daemon_main() try {
             case Commands::Start:
                 daemon.init_node(vars.at("node"), vars.at("replicas"), vars.at("consistency"));
                 break;
-            case Commands::Terminate:
-                //TODO: terminate node
-                cout << "[daemon] Terminating" << endl;
-                daemon.terminate();
-                break;
+            case Commands::Terminate: {
+                auto nodeit = vars.find("node");
+                if (nodeit == vars.end()) {
+                    // Terminate daemon
+                    cout << "[daemon] Terminating" << endl;
+                    daemon.terminate();
+                } else {
+                    // Terminate node
+                    //TODO;
+                }
+            }   break;
             default:
                 break;
         }

@@ -7,9 +7,21 @@
 using namespace std;
 using namespace TCLAP;
 
-Commands Options::command() {
+bool Options::was_node_specified() const noexcept {
+    return _m_target_type == TargetTypes::Node;
+}
+
+Commands Options::command() const {
     return _m_command;
 }
+
+unsigned Options::node() const try {
+    if (_m_target_type != TargetTypes::Node) throw runtime_error("No node was specified");
+    return _m_node;
+} catch (const exception&) {
+    throw_with_nested(runtime_error("While requesting node number from parsed options"));
+}
+
 
 void Options::parse(int argc, char** argv) try {
     CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", false);
