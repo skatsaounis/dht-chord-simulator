@@ -12,6 +12,10 @@
 using namespace std;
 using json = nlohmann::json;
 
+void DaemonInterface::_send_message(const string& msg) const {
+    int n = write(sfd, msg.c_str(), msg.length());
+    if (n < 0) throw system_error(errno, system_category(), "Cannot write message to daemon socket");
+}
 
 DaemonInterface::DaemonInterface() try {
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -59,11 +63,21 @@ void DaemonInterface::start() {
 }
 
 void DaemonInterface::terminate() try {
-    json jmsg = {
-       {"cmd", "terminate"}};
-    string msg = jmsg.dump();
-    int n = write(sfd, msg.c_str(), msg.length());
-    if (n < 0) throw system_error(errno, system_category(), "Cannot write message to daemon socket");
+    json jmsg = {{"cmd", "terminate"}};
+    _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While sending termination message to daemon"));
 }
+
+void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {
+    json jmsg = {
+        {"cmd", "start"},
+        {"node", to_string(node_id)},
+        {"replicas", to_string(n_replicas)},
+        {"consistency", to_string(consistency)},
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to initialize node " + to_string(node_id)));
+}
+

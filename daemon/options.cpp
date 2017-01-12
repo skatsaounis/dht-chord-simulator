@@ -22,6 +22,13 @@ unsigned Options::node() const try {
     throw_with_nested(runtime_error("While requesting node number from parsed options"));
 }
 
+unsigned Options::n_replicas() const noexcept {
+    return _m_n_replicas;
+}
+
+ConsistencyTypes Options::consistency() const noexcept {
+    return _m_consistency;
+}
 
 void Options::parse(int argc, char** argv) try {
     CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", false);
@@ -45,6 +52,7 @@ void Options::parse(int argc, char** argv) try {
             exit(EXIT_SUCCESS);
         default:
             break;
+        //TODO: parse 'start' arguments
     }
 }
 catch (const exception&) {
