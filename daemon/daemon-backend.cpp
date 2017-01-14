@@ -46,7 +46,7 @@ void Daemon::init_node(const string& node_id, const string& replica_factor, cons
         execve(command, newargv, newenviron);
     }
     else if (pid > 0) {
-        cout << "[daemon] Initialized node " << node_id;
+        cout << "[daemon] Initialized node " << node_id << endl;
     }
     else
         throw system_error(errno, system_category(), "Failed to fork node process");

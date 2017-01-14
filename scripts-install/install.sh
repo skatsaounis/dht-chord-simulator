@@ -51,6 +51,7 @@ mkdir -m 755 /usr/local/share/dsemu
 chown root:root /usr/local/share/dsemu
 cp *.py /usr/local/share/dsemu/
 mkdir /usr/local/share/dsemu/lib
+touch /usr/local/share/dsemu/lib/__init__.py
 cp lib/*.py /usr/local/share/dsemu/lib/
 chown root:dsemu /usr/local/share/dsemu/*.py
 chown root:dsemu /usr/local/share/dsemu/lib/*.py

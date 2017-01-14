@@ -10,5 +10,6 @@ enum class ConsistencyTypes {
 };
 
 std::string to_string(ConsistencyTypes);
+ConsistencyTypes to_consistency_enum(const std::string&);
 
 #endif

@@ -21,7 +21,10 @@ int main(int argc, char** argv) try {
         case Commands::Start:
             if (options.was_node_specified()) {
                 // Initialize node
-                daemon.init_node(options.node(), options.n_replicas(), options.consistency());
+                if (daemon.isRunning())
+                    daemon.init_node(options.node(), options.n_replicas(), options.consistency());
+                else
+                    cerr << "Daemon is not running" << endl;
             } else {
                 // Start daemon
                 if (!daemon.isRunning())

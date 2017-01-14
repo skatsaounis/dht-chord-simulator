@@ -9,7 +9,8 @@
 - [ ] status()
 - [x] start()
 - [x] terminate()
-- [ ] init_node()
+- [ ]   terminate all nodes on exit
+- [x] init_node()
 - [ ] terminate_node()
 - [ ] list_nodes()
 - [ ] list_commands()
