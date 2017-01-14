@@ -3,6 +3,9 @@
 #include <tclap/CmdLine.h>
 #include <cstdlib>
 #include <stdexcept>
+#include <vector>
+#include <string>
+#include <iostream>
 
 using namespace std;
 using namespace TCLAP;
@@ -31,11 +34,12 @@ ConsistencyTypes Options::consistency() const noexcept {
 }
 
 void Options::parse(int argc, char** argv) try {
-    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", false);
+    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", true);
+    cmd.setExceptionHandling(false);
     auto commands = all_command_names();
     ValuesConstraint<string> allowed_commands(commands);
     UnlabeledValueArg<string> command_arg("command",
-        "Command to be executed by the Distributed Systems Emulator Daemon (dsemud).\n"
+        "Command to be executed by the Distributed Systems Emulator Daemon.\n"
         "Use 'dsemu help <command>' to see usage for each command.",
         true, "help", &allowed_commands, cmd);
     UnlabeledMultiArg<string> parameter_args("parameters",
@@ -43,6 +47,8 @@ void Options::parse(int argc, char** argv) try {
         false, "parameters", cmd, true);
     cmd.parse(argc, argv);
     _m_command = to_command_enum(command_arg.getValue());
+    auto parameters = parameter_args.getValue();
+    if (!parameters.empty()) parameters.emplace(parameters.begin(), "dsemu " + command_arg.getValue());
     switch (command()) {
         case Commands::Help:
             cmd.getOutput()->usage(cmd);
@@ -50,10 +56,31 @@ void Options::parse(int argc, char** argv) try {
         case Commands::Version:
             cmd.getOutput()->version(cmd);
             exit(EXIT_SUCCESS);
+        case Commands::Start:
+            if (parameters.empty())
+                _m_target_type = TargetTypes::Daemon;                            
+            else {
+                CmdLine params("Distributed Systems Emulator: Start command");
+                params.setExceptionHandling(false);
+                ValueArg<unsigned> node_id("n", "node", "ID of the node to initialize", true, 0, "Integer", params);
+                ValueArg<unsigned> n_replicas("r", "replicas", "Number of replicas of the DHT values", false, 1, "Integer", params);
+                vector<string> consistency_types{"linear", "eventual"};
+                ValuesConstraint<string> allowed_consistency(consistency_types);
+                ValueArg<string> consistency("c", "consistency", "Type of consistency", false, "linear", &allowed_consistency, params);
+                params.parse(parameters);
+                _m_target_type = TargetTypes::Node;
+                _m_node = node_id.getValue();
+                _m_n_replicas = n_replicas.getValue();
+                _m_consistency = to_consistency_enum(consistency.getValue());
+            }
+            break;
         default:
             break;
-        //TODO: parse 'start' arguments
     }
+}
+catch (const ArgException& e) {
+    cerr << (e.argId() == "undefined" ? e.error() : e.what()) << endl;
+    exit(EXIT_FAILURE);
 }
 catch (const exception&) {
     throw_with_nested(runtime_error("While parsing command line parameters"));

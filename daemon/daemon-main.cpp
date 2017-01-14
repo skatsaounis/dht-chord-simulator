@@ -41,6 +41,7 @@ void daemon_main() try {
     // Main service loop.
 
     Daemon daemon;
+    cout << "[daemon] Starting" << endl;
     while (daemon.is_running()) try {
         // Accept incoming connection
         struct sockaddr_un cliaddr;
