@@ -74,10 +74,19 @@ void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, Consisten
         {"cmd", "start"},
         {"node", to_string(node_id)},
         {"replicas", to_string(n_replicas)},
-        {"consistency", to_string(consistency)},
+        {"consistency", to_string(consistency)}
     };
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting daemon to initialize node " + to_string(node_id)));
 }
 
+void DaemonInterface::terminate_node(unsigned node_id) try {
+    json jmsg = {
+        {"cmd", "terminate"},
+        {"node", to_string(node_id)}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to terminate node " + to_string(node_id)));
+}

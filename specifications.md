@@ -11,9 +11,11 @@
 - [x] terminate()
 - [ ]   terminate all nodes on exit
 - [x] init_node()
+- [ ]   init only inactive nodes
 - [ ] terminate_node()
+- [ ]   terminate only active nodes
 - [ ] list_nodes()
-- [ ] list_commands()
+- [x] list_commands()
 
 # Node Methods
 
