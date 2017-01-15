@@ -68,6 +68,7 @@ void daemon_main() try {
                 //TODO; (also in frontend)
                 break;
             case Commands::Start:
+                // Initialize node
                 daemon.init_node(vars.at("node"), vars.at("replicas"), vars.at("consistency"));
                 break;
             case Commands::Terminate: {
@@ -78,7 +79,7 @@ void daemon_main() try {
                     daemon.terminate();
                 } else {
                     // Terminate node
-                    //TODO;
+                    daemon.terminate_node(*nodeit);
                 }
             }   break;
             default:

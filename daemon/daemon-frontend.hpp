@@ -18,6 +18,7 @@ public:
     void start();
     void terminate();
     void init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency);
+    void terminate_node(unsigned node_id);
 };
 
 #endif  // _DSEMU_DAEMON_FRONTEND_HPP_

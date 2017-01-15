@@ -53,3 +53,10 @@ void Daemon::init_node(const string& node_id, const string& replica_factor, cons
 } catch(const exception&) {
     throw_with_nested(runtime_error("While initializing node " + node_id));
 }
+
+void Daemon::terminate_node(const string& node_id) try {
+    //TODO: Send terminate command to node
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While terminating node " + node_id));
+}
+
