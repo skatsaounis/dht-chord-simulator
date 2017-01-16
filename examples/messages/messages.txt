@@ -110,3 +110,11 @@ send_keys = {
         replica_counter: 2
     }
 }
+
+answer = {
+    'cmd': 'answer',
+    'sender': '1',
+    'args': {
+        'value': 'nf' or 'Ace of Spades'
+    }
+}
