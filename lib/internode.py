@@ -177,3 +177,8 @@ def dht_keys(args, node):
         pass
 
     return node
+
+
+def dht_answer(args):
+    print('Answer is ' + args['value'])
+    # TODO - send awk to daemon socket
