@@ -80,9 +80,6 @@ try:
                 elif cmd == 'answer':
                     print('Received answer from ' + str(sender))
                     dht_answer(args)
-                elif cmd == 'query':
-                    # TODO
-                    print('Received query command from ' + str(sender))
                 elif cmd == 'delete':
                     # TODO
                     print('Received delete command from ' + str(sender))
