@@ -5,7 +5,7 @@ import sys
 import select
 
 from lib.middleware import receive_message, create_socket
-from lib.internode import dht_join, dht_depart, dht_keys
+from lib.internode import dht_join, dht_depart, dht_keys, dht_answer
 from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, query_cmd
 
 # node.py <name> <replica_factor> <consistency>
@@ -77,6 +77,9 @@ try:
                 elif cmd == 'keys':
                     print('Received keys from ' + str(sender))
                     node = dht_keys(args, node)
+                elif cmd == 'answer':
+                    print('Received answer from ' + str(sender))
+                    dht_answer(args)
                 elif cmd == 'query':
                     # TODO
                     print('Received query command from ' + str(sender))

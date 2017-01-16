@@ -145,8 +145,17 @@ def query_cmd(args, node):
                 next_socket.sendall(send_message(query_key))
                 next_socket.close()
             else:
-                # TODO -- send answer to initial sender
-                print(node['keys'][key])
+                # send answer to initial node
+                answer = {
+                    'cmd': 'answer',
+                    'sender': node['n'],
+                    'args': {
+                        'value': node['keys'][key]
+                    }
+                }
+                next_socket = create_socket(initial_sender)
+                next_socket.sendall(send_message(answer))
+                next_socket.close()
         elif node['consistency'] == 'eventual':
             # TODO -- send answer to initial sender
             print(node['keys'][key])
