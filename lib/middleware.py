@@ -1,5 +1,6 @@
 import socket
 import json
+import hashlib
 
 
 def receive_message(json_message):
@@ -20,3 +21,9 @@ def create_socket(socket_name, init=False):
     else:
         s.connect("/tmp/" + str(socket_name))
     return s
+
+
+def hash_fun(node_id):
+    m = hashlib.sha1()
+    m.update(node_id)
+    return m.hexdigest()
