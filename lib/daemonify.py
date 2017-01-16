@@ -129,36 +129,53 @@ def query_cmd(args, node):
     else:
         initial_sender = sender
 
-    if key in node['keys']:
-        if node['consistency'] == 'linear':
-            if replica_counter > 1:
-                query_key = {
-                    'cmd': 'query-cmd',
-                    'sender': node['n'],
-                    'args': {
-                        'initial_sender': initial_sender,
-                        'key': key,
-                        'replica_counter': replica_counter - 1
+    if (
+        int(key) > node['predecessor'] and int(key) <= node['n']
+    ) or (
+        int(key) > node['predecessor'] and node['predecessor'] > node['n']
+    ):
+        if key in node['keys']:
+            if node['consistency'] == 'linear':
+                if replica_counter > 1:
+                    query_key = {
+                        'cmd': 'query-cmd',
+                        'sender': node['n'],
+                        'args': {
+                            'initial_sender': initial_sender,
+                            'key': key,
+                            'replica_counter': replica_counter - 1
+                        }
                     }
-                }
-                next_socket = create_socket(node['successor'])
-                next_socket.sendall(send_message(query_key))
-                next_socket.close()
-            else:
-                # send answer to initial node
-                answer = {
-                    'cmd': 'answer',
-                    'sender': node['n'],
-                    'args': {
-                        'value': node['keys'][key]
+                    next_socket = create_socket(node['successor'])
+                    next_socket.sendall(send_message(query_key))
+                    next_socket.close()
+                else:
+                    # send answer to initial node
+                    answer = {
+                        'cmd': 'answer',
+                        'sender': node['n'],
+                        'args': {
+                            'value': node['keys'][key]
+                        }
                     }
+                    next_socket = create_socket(initial_sender)
+                    next_socket.sendall(send_message(answer))
+                    next_socket.close()
+            elif node['consistency'] == 'eventual':
+                # TODO -- send answer to initial sender
+                print(node['keys'][key])
+        else:
+            # send answer to initial node
+            answer = {
+                'cmd': 'answer',
+                'sender': node['n'],
+                'args': {
+                    'value': 'nf'
                 }
-                next_socket = create_socket(initial_sender)
-                next_socket.sendall(send_message(answer))
-                next_socket.close()
-        elif node['consistency'] == 'eventual':
-            # TODO -- send answer to initial sender
-            print(node['keys'][key])
+            }
+            next_socket = create_socket(initial_sender)
+            next_socket.sendall(send_message(answer))
+            next_socket.close()
     else:
         query_key = {
             'cmd': 'query-cmd',

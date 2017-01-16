@@ -180,5 +180,8 @@ def dht_keys(args, node):
 
 
 def dht_answer(args):
-    print('Answer is ' + args['value'])
+    if args['value'] != 'nf':
+        print('Answer is ' + args['value'])
+    else:
+        print('Key not found')
     # TODO - send awk to daemon socket
