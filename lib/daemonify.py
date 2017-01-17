@@ -189,3 +189,7 @@ def query_cmd(args, node):
         next_socket = create_socket(node['successor'])
         next_socket.sendall(send_message(query_key))
         next_socket.close()
+
+
+def delete_cmd(args, node):
+    return node
