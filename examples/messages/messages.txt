@@ -38,6 +38,16 @@ json_msg = {
     }
 }
 
+json_msg = {
+    'cmd': 'delete-cmd',
+    'sender': 'daemon',
+    'args': {
+        'key': '4',
+        'initial_sender': 'daemon',
+        'replica_counter': 2
+    }
+}
+
 ## Internode Messages
 
 join_pred = {
