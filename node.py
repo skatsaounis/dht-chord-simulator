@@ -6,7 +6,8 @@ import select
 
 from lib.middleware import receive_message, create_socket
 from lib.internode import dht_join, dht_depart, dht_keys, dht_answer
-from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, query_cmd
+from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, \
+    query_cmd, delete_cmd
 
 # node.py <name> <replica_factor> <consistency>
 if len(sys.argv) != 4:
@@ -43,6 +44,7 @@ try:
                 sender = message['sender']
                 cmd = message['cmd']
                 args = message['args']
+
                 # Here we accept messages from daemon
                 if cmd == 'list-cmd':
                     print('Received daemon list command')
@@ -67,6 +69,10 @@ try:
                 elif cmd == 'query-cmd':
                     print('Received daemon query command')
                     query_cmd(args, node)
+                elif cmd == 'delete-cmd':
+                    print('Received daemon delete command')
+                    node = delete_cmd(args, node)
+
                 # Here we accept internode messages
                 elif cmd == 'join':
                     print('Received join command from ' + str(sender))
@@ -80,9 +86,6 @@ try:
                 elif cmd == 'answer':
                     print('Received answer from ' + str(sender))
                     dht_answer(args)
-                elif cmd == 'delete':
-                    # TODO
-                    print('Received delete command from ' + str(sender))
                 else:
                     print('Received unknown response from ' + str(sender))
 
