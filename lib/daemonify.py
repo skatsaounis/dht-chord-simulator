@@ -124,58 +124,77 @@ def query_cmd(args, node):
     sender = args['initial_sender']
     replica_counter = int(args['replica_counter'])
 
+    # keep track which node was initially selected by daemon
     if sender == 'daemon':
         initial_sender = node['n']
     else:
         initial_sender = sender
 
-    if (
-        int(key) > node['predecessor'] and int(key) <= node['n']
-    ) or (
-        int(key) > node['predecessor'] and node['predecessor'] > node['n']
-    ):
-        if key in node['keys']:
-            if node['consistency'] == 'linear':
-                if replica_counter > 1:
-                    query_key = {
-                        'cmd': 'query-cmd',
-                        'sender': node['n'],
-                        'args': {
-                            'initial_sender': initial_sender,
-                            'key': key,
-                            'replica_counter': replica_counter - 1
-                        }
+    # key belongs to node key
+    if key in node['keys']:
+
+        # final owner answers the query in linear consistency
+        if node['consistency'] == 'linear':
+
+            # forward query to next node -- node is not the final owner of key
+            if replica_counter > 1:
+                query_key = {
+                    'cmd': 'query-cmd',
+                    'sender': node['n'],
+                    'args': {
+                        'initial_sender': initial_sender,
+                        'key': key,
+                        'replica_counter': replica_counter - 1
                     }
-                    next_socket = create_socket(node['successor'])
-                    next_socket.sendall(send_message(query_key))
-                    next_socket.close()
-                else:
-                    # send answer to initial node
-                    answer = {
-                        'cmd': 'answer',
-                        'sender': node['n'],
-                        'args': {
-                            'value': node['keys'][key]
-                        }
+                }
+                next_socket = create_socket(node['successor'])
+                next_socket.sendall(send_message(query_key))
+                next_socket.close()
+
+            # node is the final owner -- node must answer to initial node
+            else:
+                answer = {
+                    'cmd': 'answer',
+                    'sender': node['n'],
+                    'args': {
+                        'type': 'query',
+                        'value': node['keys'][key]
                     }
-                    next_socket = create_socket(initial_sender)
-                    next_socket.sendall(send_message(answer))
-                    next_socket.close()
-            elif node['consistency'] == 'eventual':
-                # TODO -- send answer to initial sender
-                print(node['keys'][key])
-        else:
-            # send answer to initial node
+                }
+                next_socket = create_socket(initial_sender)
+                next_socket.sendall(send_message(answer))
+                next_socket.close()
+
+        # first owner answers the query in eventual consistency
+        elif node['consistency'] == 'eventual':
             answer = {
                 'cmd': 'answer',
                 'sender': node['n'],
                 'args': {
-                    'value': 'nf'
+                    'type': 'query',
+                    'value': node['keys'][key]
                 }
             }
             next_socket = create_socket(initial_sender)
             next_socket.sendall(send_message(answer))
             next_socket.close()
+
+    # key not found in chord ring
+    elif (node['n'] == initial_sender) and (sender != 'daemon'):
+        # send answer to initial node
+        answer = {
+            'cmd': 'answer',
+            'sender': node['n'],
+            'args': {
+                'type': 'query',
+                'value': 'nf'
+            }
+        }
+        next_socket = create_socket(initial_sender)
+        next_socket.sendall(send_message(answer))
+        next_socket.close()
+
+    # forward query command to successor in chord ring
     else:
         query_key = {
             'cmd': 'query-cmd',
@@ -192,4 +211,76 @@ def query_cmd(args, node):
 
 
 def delete_cmd(args, node):
-    return node
+    key = args['key']
+    sender = args['initial_sender']
+    replica_counter = int(args['replica_counter'])
+
+    # keep track which node was initially selected by daemon
+    if sender == 'daemon':
+        initial_sender = node['n']
+    else:
+        initial_sender = sender
+
+    if key in node['keys']:
+        # delete it from dictionary
+        del node['keys'][key]
+
+        # check for replicas -- forward delete to successor on chord ring
+        if replica_counter > 1:
+            delete_key = {
+                'cmd': 'delete-cmd',
+                'sender': node['n'],
+                'args': {
+                    'initial_sender': initial_sender,
+                    'key': key,
+                    'replica_counter': replica_counter - 1
+                }
+            }
+            next_socket = create_socket(node['successor'])
+            next_socket.sendall(send_message(delete_key))
+            next_socket.close()
+
+        else:
+            # send answer to initial node
+            answer = {
+                'cmd': 'answer',
+                'sender': node['n'],
+                'args': {
+                    'type': 'delete',
+                    'value': node['keys'][key]
+                }
+            }
+            next_socket = create_socket(initial_sender)
+            next_socket.sendall(send_message(answer))
+            next_socket.close()
+
+    # key not found in chord ring
+    elif (node['n'] == initial_sender) and (sender != 'daemon'):
+
+        # send answer to initial node
+        answer = {
+            'cmd': 'answer',
+            'sender': node['n'],
+            'args': {
+                'type': 'delete',
+                'value': 'nf'
+            }
+        }
+        next_socket = create_socket(initial_sender)
+        next_socket.sendall(send_message(answer))
+        next_socket.close()
+
+    # forward delete command to successor in chord ring
+    else:
+        delete_key = {
+            'cmd': 'delete-cmd',
+            'sender': node['n'],
+            'args': {
+                'initial_sender': initial_sender,
+                'key': key,
+                'replica_counter': replica_counter
+            }
+        }
+        next_socket = create_socket(node['successor'])
+        next_socket.sendall(send_message(delete_key))
+        next_socket.close()

@@ -23,7 +23,7 @@
 - [x] insert(key:string, value:string)
 - [x] query(key:string): value:string
 - [x] answer(value:string, node_id:unsigned)
-- [ ] delete(key:string)
+- [x] delete(key:string)
 - [x] hash(key:string): value:unsigned (same with id, node_id)
 
 # Inter-Node communication methods
