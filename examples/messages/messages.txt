@@ -117,7 +117,8 @@ send_keys = {
             3: 'Way down we go',
             4: 'Smells like teen spirit'
         },
-        replica_counter: 2
+        'replica_counter': 2,
+        'type': 'join'
     }
 }
 

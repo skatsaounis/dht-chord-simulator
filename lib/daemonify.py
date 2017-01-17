@@ -38,7 +38,8 @@ def depart_cmd(node):
         'sender': node['n'],
         'args': {
             'keys': node['keys'],
-            'replica_counter': node['replica_factor'] - 1
+            'replica_counter': node['replica_factor'] - 1,
+            'type': 'depart'
         }
     }
     sending_socket = create_socket(node['successor'])
@@ -68,6 +69,8 @@ def insert_cmd(args, node):
     key = args['key']
     value = args['value']
 
+    # TODO -- need initial sender gathering
+
     if (
         node['n'] == int(key)
     ) or (
@@ -83,25 +86,27 @@ def insert_cmd(args, node):
         # write key to my keys
         node['keys'].update({key: value})
 
+        # send answer if eventual
+        if node['consistency'] == 'eventual':
+            # TODO -- need initial sender gathering
+            pass
+
         # propagate replicas
         if node['replica_factor'] > 1:
-            if node['consistency'] == 'linear':
-                insert_key = {
-                    'cmd': 'keys',
-                    'sender': node['n'],
-                    'args': {
-                        'keys': {key: value},
-                        'replica_counter': node['replica_factor'] - 1
-                    }
+            insert_key = {
+                'cmd': 'keys',
+                'sender': node['n'],
+                'args': {
+                    'keys': {key: value},
+                    'replica_counter': node['replica_factor'] - 1,
+                    'type': 'insert'
                 }
+            }
 
-                next_socket = create_socket(node['successor'])
-                next_socket.sendall(send_message(insert_key))
-                next_socket.close()
+            next_socket = create_socket(node['successor'])
+            next_socket.sendall(send_message(insert_key))
+            next_socket.close()
 
-            elif node['consistency'] == 'eventual':
-                # TODO
-                pass
     else:
         # send key to successor
         insert_key = {
