@@ -21,7 +21,8 @@ def dht_send_keys(node):
         'sender': node['n'],
         'args': {
             'keys': n_keys,
-            'replica_counter': node['replica_factor'] - 1
+            'replica_counter': node['replica_factor'] - 1,
+            'type': 'join'
         }
     }
     sending_socket = create_socket(node['predecessor'])
@@ -158,22 +159,29 @@ def dht_depart(args, node):
 def dht_keys(args, node):
     replica_counter = int(args['replica_counter'])
     keys = args['keys']
+    cmd_type = args['type']
+
+    # update keys
     node['keys'].update(keys)
-    if node['consistency'] == 'linear':
-        if replica_counter > 1:
-            send_keys = {
-                'cmd': 'keys',
-                'sender': node['n'],
-                'args': {
-                    'keys': keys,
-                    'replica_counter': replica_counter - 1
-                }
+
+    # forward replicas
+    if replica_counter > 1:
+        send_keys = {
+            'cmd': 'keys',
+            'sender': node['n'],
+            'args': {
+                'keys': keys,
+                'replica_counter': replica_counter - 1,
+                'type': cmd_type
             }
-            sending_socket = create_socket(node['successor'])
-            sending_socket.sendall(send_message(send_keys))
-            sending_socket.close()
-    elif node['consistency'] == 'eventual':
-        # TODO
+        }
+        sending_socket = create_socket(node['successor'])
+        sending_socket.sendall(send_message(send_keys))
+        sending_socket.close()
+
+    # send answer to initial node
+    elif (node['consistency'] == 'linear') and (cmd_type == 'insert'):
+        # TODO -- need initial sender gathering
         pass
 
     return node
