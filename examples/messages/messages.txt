@@ -24,7 +24,8 @@ json_msg = {
     'sender': 'daemon-socket-id',
     'args': {
         'key': '4',
-        'value': 'Ace of Spades'
+        'value': 'Ace of Spades',
+        'initial_sender': 'daemon'
     }
 }
 
@@ -118,7 +119,8 @@ send_keys = {
             4: 'Smells like teen spirit'
         },
         'replica_counter': 2,
-        'type': 'join'
+        'type': 'join',
+        'initial_sender': '1'
     }
 }
 
