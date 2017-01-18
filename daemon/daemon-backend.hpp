@@ -8,6 +8,8 @@ class Daemon {
     bool _m_is_running = true;
     std::unordered_map<std::string, unsigned> node_ids;
 
+    void _send_message(const std::string& node_id, const std::string& msg) const;
+
 public:
 
     bool is_running() const;

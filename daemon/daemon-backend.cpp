@@ -1,11 +1,33 @@
 #include "daemon-backend.hpp"
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <string>
 #include <iostream>
 #include <cstring>
 #include <system_error>
+#include <json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
+
+void Daemon::_send_message(const string& node_id, const string& msg) const {
+    int sfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sfd == -1) throw system_error(errno, system_category(), "Cannot create socket");
+
+    struct sockaddr_un saddr;
+    memset(&saddr, 0, sizeof(struct sockaddr_un));
+    saddr.sun_family = AF_UNIX;
+    strncpy(saddr.sun_path, ("/var/run/dsemu/" + node_id).c_str(), sizeof(saddr.sun_path) - 1);
+
+    int ret = connect(sfd, (struct sockaddr*) &saddr, sizeof(saddr));
+    if (ret < 0) throw system_error(errno, system_category(), "Cannot connect to node socket");
+
+    int n = write(sfd, msg.c_str(), msg.length());
+    if (n < 0) throw system_error(errno, system_category(), "Cannot write message to node socket");
+
+     shutdown(sfd, SHUT_RDWR);
+}
 
 bool Daemon::is_running() const {
     return _m_is_running;
@@ -57,7 +79,12 @@ void Daemon::init_node(const string& node_id, const string& replica_factor, cons
 
 void Daemon::terminate_node(const string& node_id) try {
     node_ids.erase(node_id);
-    //TODO: Send terminate command to node
+    json jmsg = {
+        {"cmd", "depart-cmd"},
+        {"sender", "daemon-socket-id"},
+        {"args", ""}
+    };
+    _send_message(node_id, jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While terminating node " + node_id));
 }
