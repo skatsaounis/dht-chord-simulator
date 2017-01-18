@@ -247,7 +247,26 @@ def delete_cmd(args, node):
         # delete it from dictionary
         del node['keys'][key]
 
-        # check for replicas -- forward delete to successor on chord ring
+        # first node sends answer to initial sender
+        if (
+            replica_counter == node['replica_factor']
+        ) and (
+            node['consistency'] == 'eventual'
+        ):
+            # send answer to initial node
+            answer = {
+                'cmd': 'answer',
+                'sender': node['n'],
+                'args': {
+                    'type': 'delete',
+                    'value': node['keys'][key]
+                }
+            }
+            next_socket = create_socket(initial_sender)
+            next_socket.sendall(send_message(answer))
+            next_socket.close()
+
+        # also delete replicas -- forward delete to successor on chord ring
         if replica_counter > 1:
             delete_key = {
                 'cmd': 'delete-cmd',
@@ -262,7 +281,8 @@ def delete_cmd(args, node):
             next_socket.sendall(send_message(delete_key))
             next_socket.close()
 
-        else:
+        # all replicas deleted -- inform initial sender
+        elif node['consistency'] == 'linear':
             # send answer to initial node
             answer = {
                 'cmd': 'answer',
