@@ -14,7 +14,7 @@
 - [ ]   init only inactive nodes
 - [ ] terminate_node()
 - [ ]   terminate only active nodes
-- [ ] list_nodes()
+- [x] list_nodes()
 - [x] list_commands()
 
 # Node Methods

@@ -82,6 +82,9 @@ void daemon_main() try {
                     daemon.terminate_node(*nodeit);
                 }
             }   break;
+            case Commands::List:
+                daemon.list_nodes();
+                break;
             default:
                 break;
         }
