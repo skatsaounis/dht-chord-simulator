@@ -85,7 +85,7 @@ try:
                     node = dht_keys(args, node)
                 elif cmd == 'answer':
                     print('Received answer from ' + str(sender))
-                    dht_answer(args)
+                    dht_answer(args, sender)
                 else:
                     print('Received unknown response from ' + str(sender))
 
