@@ -39,7 +39,8 @@ def depart_cmd(node):
         'args': {
             'keys': node['keys'],
             'replica_counter': node['replica_factor'] - 1,
-            'type': 'depart'
+            'type': 'depart',
+            'initial_sender': 'dummy_value'
         }
     }
     sending_socket = create_socket(node['successor'])
@@ -68,8 +69,13 @@ def list_cmd(node):
 def insert_cmd(args, node):
     key = args['key']
     value = args['value']
+    sender = args['initial_sender']
 
-    # TODO -- need initial sender gathering
+    # keep track which node was initially selected by daemon
+    if sender == 'daemon':
+        initial_sender = node['n']
+    else:
+        initial_sender = sender
 
     if (
         node['n'] == int(key)
@@ -88,8 +94,17 @@ def insert_cmd(args, node):
 
         # send answer if eventual
         if node['consistency'] == 'eventual':
-            # TODO -- need initial sender gathering
-            pass
+            answer = {
+                'cmd': 'answer',
+                'sender': node['n'],
+                'args': {
+                    'type': 'insert',
+                    'value': 'awk'
+                }
+            }
+            next_socket = create_socket(initial_sender)
+            next_socket.sendall(send_message(answer))
+            next_socket.close()
 
         # propagate replicas
         if node['replica_factor'] > 1:
@@ -99,7 +114,8 @@ def insert_cmd(args, node):
                 'args': {
                     'keys': {key: value},
                     'replica_counter': node['replica_factor'] - 1,
-                    'type': 'insert'
+                    'type': 'insert',
+                    'initial_sender': initial_sender
                 }
             }
 
@@ -115,6 +131,7 @@ def insert_cmd(args, node):
             'args': {
                 'key': key,
                 'value': value,
+                'initial_sender': initial_sender
             }
         }
         next_socket = create_socket(node['successor'])
