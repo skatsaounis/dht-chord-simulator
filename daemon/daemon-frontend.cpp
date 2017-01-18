@@ -58,6 +58,13 @@ bool DaemonInterface::isRunning() {
     return _m_is_connected;
 }
 
+void DaemonInterface::status() try {
+    json jmsg = {{"cmd", "status"}};
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending status report request to daemon"));
+}
+
 void DaemonInterface::start() {
     daemon_main();
 }
@@ -67,6 +74,13 @@ void DaemonInterface::terminate() try {
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While sending termination message to daemon"));
+}
+
+void DaemonInterface::list_nodes() try {
+    json jmsg = {{"cmd", "list"}};
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending node list show request to daemon"));
 }
 
 void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {

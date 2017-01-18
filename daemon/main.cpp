@@ -24,7 +24,7 @@ int main(int argc, char** argv) try {
     switch (options.command()) {
         case Commands::Status:
             if (daemon.isRunning())
-                cout << "The daemon is running." << endl;
+                daemon.status();
             else
                 cout << "The daemon is not running." << endl;
             break;
@@ -50,6 +50,10 @@ int main(int argc, char** argv) try {
                 if (daemon.isRunning())
                     daemon.terminate();
             } break;
+        case Commands::List:
+            check_daemon_running();
+            daemon.list_nodes();
+            break;
         case Commands::Help:
         case Commands::Version:
             // Handled by the options parser.

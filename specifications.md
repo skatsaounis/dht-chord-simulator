@@ -6,7 +6,7 @@
 - [ ] query(key:string): value:string
 - [ ] delete(key:string)
 - [ ] hash(key:string): value:unsigned (same with id, node_id)
-- [ ] status()
+- [x] status()
 - [x] start()
 - [x] terminate()
 - [ ]   terminate all nodes on exit

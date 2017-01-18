@@ -47,7 +47,7 @@ void daemon_main() try {
         struct sockaddr_un cliaddr;
         socklen_t cliaddr_size = sizeof(cliaddr);
         int csfd = accept(sfd, (struct sockaddr*) &cliaddr, &cliaddr_size);
-        if (csfd == -1) throw system_error(errno, system_category(), "Could not accept incoming connection");        
+        if (csfd == -1) throw system_error(errno, system_category(), "Could not accept incoming connection");
         // Receive request
         stringstream ss;
         while (true) {
@@ -65,7 +65,7 @@ void daemon_main() try {
         Commands cmd = to_command_enum(vars.at("cmd"));
         switch(cmd) {
             case Commands::Status:
-                //TODO; (also in frontend)
+                cout << "[daemon] Status: Running." << endl;
                 break;
             case Commands::Start:
                 // Initialize node
