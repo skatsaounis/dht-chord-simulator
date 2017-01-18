@@ -9,7 +9,7 @@
 - [x] status()
 - [x] start()
 - [x] terminate()
-- [ ]   terminate all nodes on exit
+- [x]   terminate all nodes on exit
 - [x] init_node()
 - [ ]   init only inactive nodes
 - [x] terminate_node()

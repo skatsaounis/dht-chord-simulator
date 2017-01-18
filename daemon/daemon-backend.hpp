@@ -9,6 +9,7 @@ class Daemon {
     std::unordered_map<std::string, unsigned> node_ids;
 
     void _send_message(const std::string& node_id, const std::string& msg) const;
+    void _send_terminate(const std::string& node_id) const;
 
 public:
 
