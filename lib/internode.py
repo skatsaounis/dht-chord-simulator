@@ -199,9 +199,24 @@ def dht_keys(args, node):
     return node
 
 
-def dht_answer(args):
-    if args['value'] != 'nf':
-        print('Answer is ' + args['value'])
-    else:
-        print('Key not found')
+def dht_answer(args, sender):
+    cmd_type = args['type']
+
+    print('Answer has been received from node' + str(sender))
+
+    if cmd_type == 'insert':
+        print('Key has been inserted')
+
+    elif cmd_type == 'delete':
+        if args['value'] != 'nf':
+            print(args['value'] + ' has been deleted')
+        else:
+            print('Key not found')
+
+    elif cmd_type == 'query':
+        if args['value'] != 'nf':
+            print('Answer is ' + args['value'])
+        else:
+            print('Key not found')
+
     # TODO - send awk to daemon socket
