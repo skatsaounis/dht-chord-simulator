@@ -219,4 +219,12 @@ def dht_answer(args, sender):
         else:
             print('Key not found')
 
-    # TODO - send awk to daemon socket
+    # notify daemon
+    notify_daemon = {
+        'cmd': 'notify-daemon',
+        'action': cmd_type
+    }
+
+    daemon_socket = create_socket('dsock')
+    daemon_socket.sendall(send_message(notify_daemon))
+    daemon_socket.close()
