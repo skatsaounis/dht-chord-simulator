@@ -15,9 +15,12 @@ public:
     ~DaemonInterface();
 
     bool isRunning();
+    void status();
     void start();
     void terminate();
+    void list_nodes();
     void init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency);
+    void terminate_node(unsigned node_id);
 };
 
 #endif  // _DSEMU_DAEMON_FRONTEND_HPP_

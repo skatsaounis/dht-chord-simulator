@@ -58,6 +58,13 @@ bool DaemonInterface::isRunning() {
     return _m_is_connected;
 }
 
+void DaemonInterface::status() try {
+    json jmsg = {{"cmd", "status"}};
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending status report request to daemon"));
+}
+
 void DaemonInterface::start() {
     daemon_main();
 }
@@ -69,15 +76,31 @@ void DaemonInterface::terminate() try {
     throw_with_nested(runtime_error("While sending termination message to daemon"));
 }
 
+void DaemonInterface::list_nodes() try {
+    json jmsg = {{"cmd", "list"}};
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending node list show request to daemon"));
+}
+
 void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {
     json jmsg = {
         {"cmd", "start"},
         {"node", to_string(node_id)},
         {"replicas", to_string(n_replicas)},
-        {"consistency", to_string(consistency)},
+        {"consistency", to_string(consistency)}
     };
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting daemon to initialize node " + to_string(node_id)));
 }
 
+void DaemonInterface::terminate_node(unsigned node_id) try {
+    json jmsg = {
+        {"cmd", "terminate"},
+        {"node", to_string(node_id)}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to terminate node " + to_string(node_id)));
+}

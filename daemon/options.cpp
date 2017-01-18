@@ -40,7 +40,7 @@ void Options::parse(int argc, char** argv) try {
     ValuesConstraint<string> allowed_commands(commands);
     UnlabeledValueArg<string> command_arg("command",
         "Command to be executed by the Distributed Systems Emulator Daemon.\n"
-        "Use 'dsemu help <command>' to see usage for each command.",
+        "Use 'dsemu <command> --help' to see usage for each command.",
         true, "help", &allowed_commands, cmd);
     UnlabeledMultiArg<string> parameter_args("parameters",
         "Parameters passed to the command to be executed.",
@@ -72,6 +72,18 @@ void Options::parse(int argc, char** argv) try {
                 _m_node = node_id.getValue();
                 _m_n_replicas = n_replicas.getValue();
                 _m_consistency = to_consistency_enum(consistency.getValue());
+            }
+            break;
+        case Commands::Terminate:
+            if (parameters.empty())
+                _m_target_type = TargetTypes::Daemon;                            
+            else {
+                CmdLine params("Distributed Systems Emulator: Terminate command");
+                params.setExceptionHandling(false);
+                ValueArg<unsigned> node_id("n", "node", "ID of the node to terminate", true, 0, "Integer", params);
+                params.parse(parameters);
+                _m_target_type = TargetTypes::Node;
+                _m_node = node_id.getValue();
             }
             break;
         default:

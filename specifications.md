@@ -6,14 +6,16 @@
 - [ ] query(key:string): value:string
 - [ ] delete(key:string)
 - [ ] hash(key:string): value:unsigned (same with id, node_id)
-- [ ] status()
+- [x] status()
 - [x] start()
 - [x] terminate()
 - [ ]   terminate all nodes on exit
 - [x] init_node()
+- [ ]   init only inactive nodes
 - [ ] terminate_node()
-- [ ] list_nodes()
-- [ ] list_commands()
+- [ ]   terminate only active nodes
+- [x] list_nodes()
+- [x] list_commands()
 
 # Node Methods
 

@@ -7,42 +7,64 @@
 
 using namespace std;
 
+struct CommandError: runtime_error {
+    using runtime_error::runtime_error;
+};
+
 int main(int argc, char** argv) try {
     Options options;
     options.parse(argc, argv);
     DaemonInterface daemon;
+
+    auto check_daemon_running = [&daemon]() {
+        if (!daemon.isRunning())
+            throw CommandError("Daemon is not running");
+    };
+
     switch (options.command()) {
         case Commands::Status:
             if (daemon.isRunning())
-                cout << "The daemon is running." << endl;
+                daemon.status();
             else
                 cout << "The daemon is not running." << endl;
             break;
         case Commands::Start:
             if (options.was_node_specified()) {
                 // Initialize node
-                if (daemon.isRunning())
-                    daemon.init_node(options.node(), options.n_replicas(), options.consistency());
-                else
-                    cerr << "Daemon is not running" << endl;
+                check_daemon_running();
+                //TODO: check for already active node
+                daemon.init_node(options.node(), options.n_replicas(), options.consistency());
             } else {
                 // Start daemon
                 if (!daemon.isRunning())
                     daemon.start();
             } break;
         case Commands::Terminate:
-            if (daemon.isRunning())
-                daemon.terminate();
+            if (options.was_node_specified()) {
+                // Terminate node
+                check_daemon_running();
+                //TODO: check for already inactive node
+                daemon.terminate_node(options.node());
+            } else {
+                // Terminate daemon
+                if (daemon.isRunning())
+                    daemon.terminate();
+            } break;
+        case Commands::List:
+            check_daemon_running();
+            daemon.list_nodes();
             break;
         case Commands::Help:
         case Commands::Version:
             // Handled by the options parser.
             break;
         default:
-            cerr << "Function not implemented" << endl;
+            throw CommandError("Function not implemented");
     }
-}
-catch (const exception& e) {
+} catch (const CommandError& e) {
+    cerr << e.what() << endl;
+    exit(EXIT_FAILURE);
+} catch (const exception& e) {
     cerr << "The interface program crashed:" << endl;
     print_exception(e);
     exit(EXIT_FAILURE);
