@@ -60,7 +60,7 @@ try:
                     for active_socket in active_sockets:
                         active_socket.close()
                     print('Sockets have been closed')
-                    os.remove('/tmp/' + sys.argv[1])
+                    os.remove('/var/run/dsemu/' + sys.argv[1])
                     print('Listening token has been deleted successfuly')
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
@@ -102,6 +102,6 @@ except KeyboardInterrupt:
     for active_socket in active_sockets:
         active_socket.close()
     print('Sockets have been closed')
-    os.remove('/tmp/' + sys.argv[1])
+    os.remove('/var/run/dsemu/' + sys.argv[1])
     print('Listening token has been deleted successfuly')
     sys.exit(130)
