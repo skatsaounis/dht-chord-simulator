@@ -17,16 +17,16 @@ void Daemon::terminate() {
 
 void Daemon::init_node(const string& node_id, const string& replica_factor, const string& consistency) try {
     char command[31];
-    strncpy(command, "/usr/local/share/dsemu/node.py", 30);
+    strncpy(command, "/usr/local/share/dsemu/node.py", sizeof(command));
 
     char arg_id[node_id.length() + 1];
-    strncpy(arg_id, node_id.c_str(), node_id.length());
+    strncpy(arg_id, node_id.c_str(), sizeof(arg_id));
 
     char arg_rep[replica_factor.length() + 1];
-    strncpy(arg_rep, replica_factor.c_str(), replica_factor.length());
+    strncpy(arg_rep, replica_factor.c_str(), sizeof(arg_rep));
 
     char arg_cons[consistency.length() + 1];
-    strncpy(arg_cons, consistency.c_str(), consistency.length());
+    strncpy(arg_cons, consistency.c_str(), sizeof(arg_cons));
 
     char * newargv[] = {
         command,
