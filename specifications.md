@@ -6,6 +6,7 @@
 - [ ] query(key:string): value:string
 - [ ] delete(key:string)
 - [ ] hash(key:string): value:unsigned (same with id, node_id)
+- [ ] consistency issues
 - [x] status()
 - [x] start()
 - [x] terminate()
@@ -15,7 +16,11 @@
 - [x] terminate_node()
 - [ ]   terminate only active nodes
 - [x] list_nodes()
+- [ ]   list_ring()
+- [ ]   list_ring_stop()
 - [x] list_commands()
+- [ ] set_replicas()
+- [ ] get_replicas()
 
 # Node Methods
 

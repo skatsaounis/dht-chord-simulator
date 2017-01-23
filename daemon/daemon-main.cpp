@@ -85,6 +85,21 @@ void daemon_main() try {
             case Commands::List:
                 daemon.list_nodes();
                 break;
+            case Commands::Join:
+                daemon.join(vars.at("node"));
+                break;
+            case Commands::Depart:
+                daemon.depart(vars.at("node"));
+                break;
+            case Commands::Query:
+                daemon.query(vars.at("key"));
+                break;
+            case Commands::Insert:
+                daemon.insert(vars.at("key"), vars.at("value"));
+                break;
+            case Commands::Delete:
+                daemon.remove(vars.at("key"));
+                break;
             default:
                 break;
         }
