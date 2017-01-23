@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <string>
+#include <random>
 #include <iostream>
 #include <cstring>
 #include <system_error>
@@ -40,6 +41,33 @@ void Daemon::_send_terminate(const string& node_id) const {
     };
     _send_message(node_id, jmsg.dump());
 }
+
+/// Select a random active node.
+string Daemon::_pick_random_node() try {
+    // Algorithm from http://stackoverflow.com/a/31522686
+    if (node_ids.empty()) throw runtime_error("There are no active nodes");
+    // Generate a random node name.
+    random_device rd;
+    mt19937_64 gen(rd());
+    uniform_int_distribution<> dist(32, 126);
+    string key(16, ' ');
+    for (auto& c: key) c = static_cast<char>(dist(gen));
+    // If node exists, return it, else insert it.
+    auto ins = node_ids.insert(make_pair(key, 0));
+    if (!ins.second) return ins.first->first;
+    // Get iterator to next element (or the first, if it was the last).
+    auto it = ins.first;
+    it++;
+    if (it == node_ids.end()) it = node_ids.begin();
+    auto res = it->first;
+    // Remove the inserted random node name.
+    node_ids.erase(ins.first);
+    // Return the element that was next to the random name.
+    return res;
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While selecting a random node"));
+}
+
 
 /// Check whether the daemon is running,
 /// and able to process requests.
@@ -119,4 +147,98 @@ void Daemon::list_nodes() try {
         cout << n.first << '\t' << n.second << endl;
 } catch(const exception&) {
     throw_with_nested(runtime_error("While printing node list"));
+}
+
+/// Request node ring to list itself in order.
+void Daemon::list_ring() try {
+    json jmsg = {
+        {"cmd", "list-cmd"},
+        {"sender", "daemon-socket-id"},
+        {"args", ""}
+    };
+    _m_ring_lister = _pick_random_node();
+    _send_message(_m_ring_lister, jmsg.dump());
+    _m_listing_ring = true;
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting ring node listing"));
+}
+
+/// Halt the ordered printing of the node ring.
+void Daemon::list_ring_stop() try {
+    json jmsg = {
+        {"cmd", "list-stop-cmd"},
+        {"sender", "daemon-socket-id"},
+        {"args", ""}
+    };
+    _send_message(_m_ring_lister, jmsg.dump());
+    _m_listing_ring = false;
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While halting ring node listing"));
+}
+
+/// Request the ring to allow a new node to join.
+void Daemon::join(const string& node_id) try {
+    json jmsg = {
+        {"cmd", "join-cmd"},
+        {"sender", "daemon-socket-id"},
+        {"args", {
+            {"socket_fd", node_id}
+        }}
+    };
+    _send_message(_pick_random_node(), jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("On join of node " + node_id));
+}
+
+/// Make a node depart from the ring.
+void Daemon::depart(const string& node_id) {
+    terminate_node(node_id);
+}
+
+/// Query the DHT for the value associated with a key.
+void Daemon::query(const string& key) try {
+    json jmsg = {
+        {"cmd", "query-cmd"},
+        {"sender", "daemon"},
+        {"args", {
+            {"initial_sender", "daemon"},
+            {"key", key},
+            {"replica_counter", 2}  //FIXME 1.0
+        }}
+    };
+    _send_message(_pick_random_node(), jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While querying key " + key));
+}
+
+// Insert a key - value pair into the DHT.
+void Daemon::insert(const string& key, const string& value) try {
+    json jmsg = {
+        {"cmd", "insert-cmd"},
+        {"sender", "daemon"},
+        {"args", {
+            {"key", key},
+            {"value", value},
+            {"initial_sender", "daemon"},
+        }}
+    };
+    _send_message(_pick_random_node(), jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While inserting key " + key + " with value " + value));
+}
+
+/// Delete a key from the DHT.
+void Daemon::remove(const string& key) try {
+    json jmsg = {
+        {"cmd", "delete-cmd"},
+        {"sender", "daemon"},
+        {"args", {
+            {"initial_sender", "daemon"},
+            {"key", key},
+            {"replica_counter", 2}  //FIXME 1.0
+        }}
+    };
+    _send_message(_pick_random_node(), jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While deleting key " + key));
 }
