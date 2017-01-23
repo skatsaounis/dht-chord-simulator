@@ -83,6 +83,26 @@ void DaemonInterface::list_nodes() try {
     throw_with_nested(runtime_error("While sending node list show request to daemon"));
 }
 
+void DaemonInterface::list_ring() try {
+    json jmsg = {
+        {"cmd", "list"},
+        {"mode", "ring"}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending node ring list request to daemon"));
+}
+
+void DaemonInterface::list_ring_stop() try {
+    json jmsg = {
+        {"cmd", "list"},
+        {"mode", "ring-stop"}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending node ring list halt request to daemon"));
+}
+
 void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {
     json jmsg = {
         {"cmd", "start"},

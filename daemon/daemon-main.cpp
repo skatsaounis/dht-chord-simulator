@@ -82,9 +82,20 @@ void daemon_main() try {
                     daemon.terminate_node(*nodeit);
                 }
             }   break;
-            case Commands::List:
-                daemon.list_nodes();
-                break;
+            case Commands::List: {
+                auto modeit = vars.find("mode");
+                if (modeit == vars.end()) {
+                    daemon.list_nodes();
+                } else if (*modeit == "ring") {
+                    if (daemon.is_ring_listing_in_progress())
+                        throw runtime_error("Ring listing operation is already in progress");
+                    daemon.list_ring();
+                } else if (*modeit == "ring-stop") {
+                    if (!daemon.is_ring_listing_in_progress())
+                        throw runtime_error("No ring listing command is being executed");
+                    daemon.list_ring_stop();
+                }
+            }   break;
             case Commands::Join:
                 daemon.join(vars.at("node"));
                 break;

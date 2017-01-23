@@ -16,8 +16,8 @@
 - [x] terminate_node()
 - [ ]   terminate only active nodes
 - [x] list_nodes()
-- [ ]   list_ring()
-- [ ]   list_ring_stop()
+- [x]   list_ring()
+- [x]   list_ring_stop()
 - [x] list_commands()
 - [ ] set_replicas()
 - [ ] get_replicas()

@@ -19,6 +19,8 @@ public:
     void start();
     void terminate();
     void list_nodes();
+    void list_ring();
+    void list_ring_stop();
     void init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency);
     void terminate_node(unsigned node_id);
 };

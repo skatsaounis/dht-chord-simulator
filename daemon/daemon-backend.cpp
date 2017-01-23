@@ -75,6 +75,12 @@ bool Daemon::is_running() const {
     return _m_is_running;
 }
 
+/// Check whether an ordered ring listing request
+/// has been issued and is being executed by the ring.
+bool Daemon::is_ring_listing_in_progress() const {
+    return _m_is_listing_ring;
+}
+
 /// Terminate the daemon instance,
 /// releasing all nodes.
 void Daemon::terminate() {
@@ -158,7 +164,7 @@ void Daemon::list_ring() try {
     };
     _m_ring_lister = _pick_random_node();
     _send_message(_m_ring_lister, jmsg.dump());
-    _m_listing_ring = true;
+    _m_is_listing_ring = true;
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting ring node listing"));
 }
@@ -171,7 +177,7 @@ void Daemon::list_ring_stop() try {
         {"args", ""}
     };
     _send_message(_m_ring_lister, jmsg.dump());
-    _m_listing_ring = false;
+    _m_is_listing_ring = false;
 } catch(const exception&) {
     throw_with_nested(runtime_error("While halting ring node listing"));
 }

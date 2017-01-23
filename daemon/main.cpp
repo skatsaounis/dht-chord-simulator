@@ -52,7 +52,12 @@ int main(int argc, char** argv) try {
             } break;
         case Commands::List:
             check_daemon_running();
-            daemon.list_nodes();
+            if (options.list_mode() == "simple")
+                daemon.list_nodes();
+            else if (options.list_mode() == "ring")
+                daemon.list_ring();
+            else if (options.list_mode() == "ring-stop")
+                daemon.list_ring_stop();
             break;
         case Commands::Help:
         case Commands::Version:
