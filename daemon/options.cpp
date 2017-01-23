@@ -14,7 +14,7 @@ bool Options::was_node_specified() const noexcept {
     return _m_target_type == TargetTypes::Node;
 }
 
-Commands Options::command() const {
+Commands Options::command() const noexcept {
     return _m_command;
 }
 
@@ -33,8 +33,12 @@ ConsistencyTypes Options::consistency() const noexcept {
     return _m_consistency;
 }
 
+string Options::list_mode() const noexcept {
+    return _m_list_mode;
+}
+
 void Options::parse(int argc, char** argv) try {
-    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", true);
+    CmdLine cmd("Distributed Systems Emulator", ' ', "0.0.1", false);
     cmd.setExceptionHandling(false);
     auto commands = all_command_names();
     ValuesConstraint<string> allowed_commands(commands);
@@ -58,7 +62,7 @@ void Options::parse(int argc, char** argv) try {
             exit(EXIT_SUCCESS);
         case Commands::Start:
             if (parameters.empty())
-                _m_target_type = TargetTypes::Daemon;                            
+                _m_target_type = TargetTypes::Daemon;
             else {
                 CmdLine params("Distributed Systems Emulator: Start command");
                 params.setExceptionHandling(false);
@@ -76,7 +80,7 @@ void Options::parse(int argc, char** argv) try {
             break;
         case Commands::Terminate:
             if (parameters.empty())
-                _m_target_type = TargetTypes::Daemon;                            
+                _m_target_type = TargetTypes::Daemon;
             else {
                 CmdLine params("Distributed Systems Emulator: Terminate command");
                 params.setExceptionHandling(false);
@@ -86,6 +90,18 @@ void Options::parse(int argc, char** argv) try {
                 _m_node = node_id.getValue();
             }
             break;
+        case Commands::List:
+            if (parameters.empty())
+                _m_list_mode = "simple";
+            else {
+                CmdLine params("Distributed Systems Emulator: List command");
+                params.setExceptionHandling(false);
+                vector<string> list_modes{"simple", "ring", "ring-stop"};
+                ValuesConstraint<string> allowed_list_modes(list_modes);
+                UnlabeledValueArg<string> list_mode("mode", "Mode of list operation", false, "simple", &allowed_list_modes, params);
+                params.parse(parameters);
+                _m_list_mode = list_mode.getValue();
+            }
         default:
             break;
     }

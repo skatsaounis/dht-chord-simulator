@@ -6,7 +6,7 @@
 
 class Daemon {
     bool _m_is_running = true;
-    bool _m_listing_ring = false;
+    bool _m_is_listing_ring = false;
     std::string _m_ring_lister;
     std::unordered_map<std::string, unsigned> node_ids;
 
@@ -17,6 +17,7 @@ class Daemon {
 public:
 
     bool is_running() const;
+    bool is_ring_listing_in_progress() const;
 
     void terminate();
     void init_node(const std::string& node_id, const std::string& replica_factor, const std::string& consistency);

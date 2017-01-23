@@ -15,14 +15,16 @@ class Options
     unsigned _m_node;
     unsigned _m_n_replicas = 1;
     ConsistencyTypes _m_consistency = ConsistencyTypes::Linear;
+    std::string _m_list_mode;
 
 public:
     bool was_node_specified() const noexcept;
 
-    Commands command() const;
+    Commands command() const noexcept;
     unsigned node() const;
     unsigned n_replicas() const noexcept;
     ConsistencyTypes consistency() const noexcept;
+    std::string list_mode() const noexcept;
 
     void parse(int argc, char** argv);
 };
