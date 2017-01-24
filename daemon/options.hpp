@@ -6,16 +6,14 @@
 
 class Options
 {
-    enum class TargetTypes: unsigned {
-        None, Daemon, Node
-    };
-
     Commands _m_command;
-    TargetTypes _m_target_type = TargetTypes::None;
+    bool _m_was_node_specified = false;
     unsigned _m_node;
     unsigned _m_n_replicas = 1;
     ConsistencyTypes _m_consistency = ConsistencyTypes::Linear;
     std::string _m_list_mode;
+    std::string _m_key;
+    std::string _m_value;
 
 public:
     bool was_node_specified() const noexcept;
@@ -25,6 +23,8 @@ public:
     unsigned n_replicas() const noexcept;
     ConsistencyTypes consistency() const noexcept;
     std::string list_mode() const noexcept;
+    std::string key() const noexcept;
+    std::string value() const noexcept;
 
     void parse(int argc, char** argv);
 };

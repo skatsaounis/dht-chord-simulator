@@ -87,13 +87,8 @@ void daemon_main() try {
                 if (modeit == vars.end()) {
                     daemon.list_nodes();
                 } else if (*modeit == "ring") {
-                    if (daemon.is_ring_listing_in_progress())
-                        throw runtime_error("Ring listing operation is already in progress");
-                    daemon.list_ring();
-                } else if (*modeit == "ring-stop") {
-                    if (!daemon.is_ring_listing_in_progress())
-                        throw runtime_error("No ring listing command is being executed");
-                    daemon.list_ring_stop();
+                    cerr << "[daemon] Listing node " << vars.at("node");
+                    daemon.list_ring(vars.at("node"));
                 }
             }   break;
             case Commands::Join:

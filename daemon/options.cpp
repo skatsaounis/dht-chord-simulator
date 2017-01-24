@@ -11,7 +11,7 @@ using namespace std;
 using namespace TCLAP;
 
 bool Options::was_node_specified() const noexcept {
-    return _m_target_type == TargetTypes::Node;
+    return _m_was_node_specified;
 }
 
 Commands Options::command() const noexcept {
@@ -19,10 +19,18 @@ Commands Options::command() const noexcept {
 }
 
 unsigned Options::node() const try {
-    if (_m_target_type != TargetTypes::Node) throw runtime_error("No node was specified");
+    if (!_m_was_node_specified) throw runtime_error("No node was specified");
     return _m_node;
 } catch (const exception&) {
     throw_with_nested(runtime_error("While requesting node number from parsed options"));
+}
+
+string Options::key() const noexcept {
+    return _m_key;
+}
+
+string Options::value() const noexcept {
+    return _m_value;
 }
 
 unsigned Options::n_replicas() const noexcept {
@@ -62,7 +70,7 @@ void Options::parse(int argc, char** argv) try {
             exit(EXIT_SUCCESS);
         case Commands::Start:
             if (parameters.empty())
-                _m_target_type = TargetTypes::Daemon;
+                _m_was_node_specified = false;
             else {
                 CmdLine params("Distributed Systems Emulator: Start command");
                 params.setExceptionHandling(false);
@@ -72,7 +80,7 @@ void Options::parse(int argc, char** argv) try {
                 ValuesConstraint<string> allowed_consistency(consistency_types);
                 ValueArg<string> consistency("c", "consistency", "Type of consistency", false, "linear", &allowed_consistency, params);
                 params.parse(parameters);
-                _m_target_type = TargetTypes::Node;
+                _m_was_node_specified = true;
                 _m_node = node_id.getValue();
                 _m_n_replicas = n_replicas.getValue();
                 _m_consistency = to_consistency_enum(consistency.getValue());
@@ -80,13 +88,13 @@ void Options::parse(int argc, char** argv) try {
             break;
         case Commands::Terminate:
             if (parameters.empty())
-                _m_target_type = TargetTypes::Daemon;
+                _m_was_node_specified = false;
             else {
                 CmdLine params("Distributed Systems Emulator: Terminate command");
                 params.setExceptionHandling(false);
                 ValueArg<unsigned> node_id("n", "node", "ID of the node to terminate", true, 0, "Integer", params);
                 params.parse(parameters);
-                _m_target_type = TargetTypes::Node;
+                _m_was_node_specified = true;
                 _m_node = node_id.getValue();
             }
             break;
@@ -96,12 +104,55 @@ void Options::parse(int argc, char** argv) try {
             else {
                 CmdLine params("Distributed Systems Emulator: List command");
                 params.setExceptionHandling(false);
-                vector<string> list_modes{"simple", "ring", "ring-stop"};
+                vector<string> list_modes{"simple", "ring"};
                 ValuesConstraint<string> allowed_list_modes(list_modes);
                 UnlabeledValueArg<string> list_mode("mode", "Mode of list operation", false, "simple", &allowed_list_modes, params);
+                ValueArg<unsigned> node_id("n", "node", "ID of the node to list information", false, 0, "Integer", params);
                 params.parse(parameters);
+                _m_was_node_specified = node_id.isSet();
                 _m_list_mode = list_mode.getValue();
+                _m_node = node_id.getValue();
             }
+            break;
+        case Commands::Join: {
+                CmdLine params("Distributed Systems Emulator: Join command");
+                params.setExceptionHandling(false);
+                ValueArg<unsigned> node_id("n", "node", "ID of the node to join", true, 0, "Integer", params);
+                params.parse(parameters);
+                _m_node = node_id.getValue();
+                _m_was_node_specified = true;
+            }   break;
+        case Commands::Depart: {
+                CmdLine params("Distributed Systems Emulator: Depart command");
+                params.setExceptionHandling(false);
+                ValueArg<unsigned> node_id("n", "node", "ID of the departing node", true, 0, "Integer", params);
+                params.parse(parameters);
+                _m_node = node_id.getValue();
+                _m_was_node_specified = true;
+            }   break;
+        case Commands::Query: {
+                CmdLine params("Distributed Systems Emulator: Query command");
+                params.setExceptionHandling(false);
+                ValueArg<string> key("k", "key", "Key to query from the chord", true, 0, "String", params);
+                params.parse(parameters);
+                _m_key = key.getValue();
+            }   break;
+        case Commands::Insert: {
+                CmdLine params("Distributed Systems Emulator: Insert command");
+                params.setExceptionHandling(false);
+                ValueArg<string> key("k", "key", "Key to be added to the chord", true, 0, "String", params);
+                ValueArg<string> value("v", "value", "Value to be associated with the key", true, 0, "String", params);
+                params.parse(parameters);
+                _m_key = key.getValue();
+                _m_value = value.getValue();
+            }   break;
+        case Commands::Delete: {
+                CmdLine params("Distributed Systems Emulator: Delete command");
+                params.setExceptionHandling(false);
+                ValueArg<string> key("k", "key", "Key to delete from the chord", true, 0, "String", params);
+                params.parse(parameters);
+                _m_key = key.getValue();
+            }   break;
         default:
             break;
     }

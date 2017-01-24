@@ -83,24 +83,15 @@ void DaemonInterface::list_nodes() try {
     throw_with_nested(runtime_error("While sending node list show request to daemon"));
 }
 
-void DaemonInterface::list_ring() try {
+void DaemonInterface::list_ring(unsigned node_id) try {
     json jmsg = {
         {"cmd", "list"},
+        {"node", to_string(node_id)},
         {"mode", "ring"}
     };
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While sending node ring list request to daemon"));
-}
-
-void DaemonInterface::list_ring_stop() try {
-    json jmsg = {
-        {"cmd", "list"},
-        {"mode", "ring-stop"}
-    };
-    _send_message(jmsg.dump());
-} catch(const exception&) {
-    throw_with_nested(runtime_error("While sending node ring list halt request to daemon"));
 }
 
 void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {
@@ -123,4 +114,55 @@ void DaemonInterface::terminate_node(unsigned node_id) try {
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting daemon to terminate node " + to_string(node_id)));
+}
+
+void DaemonInterface::join(unsigned node_id) try {
+    json jmsg = {
+        {"cmd", "join"},
+        {"node", to_string(node_id)}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to join new node " + to_string(node_id)));
+}
+
+void DaemonInterface::depart(unsigned node_id) try {
+    json jmsg = {
+        {"cmd", "depart"},
+        {"node", to_string(node_id)}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to make node " + to_string(node_id) + " depart"));
+}
+
+void DaemonInterface::query(const string& key) try {
+    json jmsg = {
+        {"cmd", "query"},
+        {"key", key}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to query key " + key));
+}
+
+void DaemonInterface::insert(const string& key, const string& value) try {
+    json jmsg = {
+        {"cmd", "insert"},
+        {"key", key},
+        {"value", value}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to insert key " + key + " with value " + value));
+}
+
+void DaemonInterface::remove(const string& key) try {
+    json jmsg = {
+        {"cmd", "delete"},
+        {"key", key}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While requesting daemon to delete key " + key));
 }

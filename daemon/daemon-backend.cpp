@@ -68,17 +68,21 @@ string Daemon::_pick_random_node() try {
     throw_with_nested(runtime_error("While selecting a random node"));
 }
 
+string Daemon::_pick_random_node(const string& node_id) try {
+    if (node_ids.empty()) throw runtime_error("There are no active nodes");
+    node_ids.at(node_id);
+    node_ids.erase(node_id);
+    auto res = _pick_random_node();
+    node_ids[node_id] = stoi(node_id);
+    return res;
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While removing node from random selection"));
+}
 
 /// Check whether the daemon is running,
 /// and able to process requests.
 bool Daemon::is_running() const {
     return _m_is_running;
-}
-
-/// Check whether an ordered ring listing request
-/// has been issued and is being executed by the ring.
-bool Daemon::is_ring_listing_in_progress() const {
-    return _m_is_listing_ring;
 }
 
 /// Terminate the daemon instance,
@@ -156,30 +160,15 @@ void Daemon::list_nodes() try {
 }
 
 /// Request node ring to list itself in order.
-void Daemon::list_ring() try {
+void Daemon::list_ring(const string& node_id) try {
     json jmsg = {
         {"cmd", "list-cmd"},
         {"sender", "daemon-socket-id"},
         {"args", ""}
     };
-    _m_ring_lister = _pick_random_node();
-    _send_message(_m_ring_lister, jmsg.dump());
-    _m_is_listing_ring = true;
+    _send_message(node_id, jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting ring node listing"));
-}
-
-/// Halt the ordered printing of the node ring.
-void Daemon::list_ring_stop() try {
-    json jmsg = {
-        {"cmd", "list-stop-cmd"},
-        {"sender", "daemon-socket-id"},
-        {"args", ""}
-    };
-    _send_message(_m_ring_lister, jmsg.dump());
-    _m_is_listing_ring = false;
-} catch(const exception&) {
-    throw_with_nested(runtime_error("While halting ring node listing"));
 }
 
 /// Request the ring to allow a new node to join.
@@ -191,7 +180,7 @@ void Daemon::join(const string& node_id) try {
             {"socket_fd", node_id}
         }}
     };
-    _send_message(_pick_random_node(), jmsg.dump());
+    _send_message(_pick_random_node(node_id), jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("On join of node " + node_id));
 }
