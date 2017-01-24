@@ -55,9 +55,27 @@ int main(int argc, char** argv) try {
             if (options.list_mode() == "simple")
                 daemon.list_nodes();
             else if (options.list_mode() == "ring")
-                daemon.list_ring();
-            else if (options.list_mode() == "ring-stop")
-                daemon.list_ring_stop();
+                daemon.list_ring(options.node());
+            break;
+        case Commands::Join:
+            check_daemon_running();
+            daemon.join(options.node());
+            break;
+        case Commands::Depart:
+            check_daemon_running();
+            daemon.depart(options.node());
+            break;
+        case Commands::Query:
+            check_daemon_running();
+            daemon.query(options.key());
+            break;
+        case Commands::Insert:
+            check_daemon_running();
+            daemon.insert(options.key(), options.value());
+            break;
+        case Commands::Delete:
+            check_daemon_running();
+            daemon.remove(options.key());
             break;
         case Commands::Help:
         case Commands::Version:
