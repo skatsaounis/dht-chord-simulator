@@ -4,7 +4,7 @@ import os
 import sys
 import select
 
-from lib.middleware import receive_message, create_socket
+from lib.middleware import receive_message, create_socket, send_message
 from lib.internode import dht_join, dht_depart, dht_keys, dht_answer
 from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, \
     query_cmd, delete_cmd
@@ -62,6 +62,14 @@ try:
                     print('[node-%d] Sockets have been closed' % (node['n']))
                     os.remove('/var/run/dsemu/' + sys.argv[1])
                     print('[node-%d] Listening token has been deleted successfuly' % (node['n']))
+                    notify_daemon = {
+                        'cmd': 'notify-daemon',
+                        'action': 'depart'
+                    }
+                    daemon_socket = create_socket('dsock')
+                    daemon_socket.sendall(send_message(notify_daemon))
+                    daemon_socket.close()
+                    print('[node-%d] Notified daemon for completion of departure' % (node['n']))
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
                     print('[node-%d] Received insert key command' % (node['n']))
