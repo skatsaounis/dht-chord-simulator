@@ -140,7 +140,7 @@ def dht_join(args, node):
         node_id = int(args['node_id'])
         node['successor'] = node_id
     else:
-        print('received unknown join type')
+        print('[node-%d] Received unknown join type' % (node['n']))
     return node
 
 
@@ -153,7 +153,7 @@ def dht_depart(args, node):
         node_id = int(args['node_id'])
         node['successor'] = node_id
     else:
-        print('received unknown depart type')
+        print('[node-%d] Received unknown depart type' % (node['n']))
     return node
 
 
@@ -199,25 +199,25 @@ def dht_keys(args, node):
     return node
 
 
-def dht_answer(args, sender):
+def dht_answer(args, sender, node):
     cmd_type = args['type']
 
-    print('Answer has been received from node' + str(sender))
+    print('[node-%d] Answer has been received from node %d' % (node['n'], sender))
 
     if cmd_type == 'insert':
-        print('Key has been inserted')
+        print('[node-%d] Key has been inserted' % (node['n']))
 
     elif cmd_type == 'delete':
         if args['value'] != 'nf':
-            print(args['value'] + ' has been deleted')
+            print('[node-%d] %s has been deleted' % (node['n'], args['value']))
         else:
-            print('Key not found')
+            print('[node-%d] Key not found' % (node['n']))
 
     elif cmd_type == 'query':
         if args['value'] != 'nf':
-            print('Answer is ' + args['value'])
+            print('[node-%d] Answer is %s' % (node['n'], args['value']))
         else:
-            print('Key not found')
+            print('[node-%d] Key not found' % (node['n']))
 
     # notify daemon
     notify_daemon = {
