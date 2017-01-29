@@ -3,7 +3,8 @@
 
 using namespace std;
 
-const string socket_path("/var/run/dsemu/dsock");
+const string socket_dir("/var/run/dsemu/");
+const string socket_path(socket_dir + "dsock");
 
 string to_string(ConsistencyTypes c) {
     switch(c) {

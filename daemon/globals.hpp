@@ -3,6 +3,7 @@
 
 #include <string>
 
+extern const std::string socket_dir;
 extern const std::string socket_path;
 
 enum class ConsistencyTypes {
