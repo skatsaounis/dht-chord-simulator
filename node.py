@@ -47,47 +47,47 @@ try:
 
                 # Here we accept messages from daemon
                 if cmd == 'list-cmd':
-                    print('Received daemon list command')
+                    print('[node-%d] Received daemon list command' % (node['n']))
                     list_cmd(node)
                 elif cmd == 'join-cmd':
-                    print('Received daemon join command')
+                    print('[node-%d] Received daemon join command' % (node['n']))
                     join_cmd(args, node)
                 elif cmd == 'depart-cmd':
-                    print('Received daemon depart command')
+                    print('[node-%d] Received daemon depart command' % (node['n']))
                     if node['successor'] != node['n']:
                         depart_cmd(node)
-                    print('Shutting down gracefully...')
+                    print('[node-%d] Shutting down gracefully...' % (node['n']))
                     for active_socket in active_sockets:
                         active_socket.close()
-                    print('Sockets have been closed')
+                    print('[node-%d] Sockets have been closed' % (node['n']))
                     os.remove('/var/run/dsemu/' + sys.argv[1])
-                    print('Listening token has been deleted successfuly')
+                    print('[node-%d] Listening token has been deleted successfuly' % (node['n']))
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
-                    print('Received insert key command')
+                    print('[node-%d] Received insert key command' % (node['n']))
                     node = insert_cmd(args, node)
                 elif cmd == 'query-cmd':
-                    print('Received daemon query command')
+                    print('[node-%d] Received daemon query command' % (node['n']))
                     query_cmd(args, node)
                 elif cmd == 'delete-cmd':
-                    print('Received daemon delete command')
+                    print('[node-%d] Received daemon delete command' % (node['n']))
                     node = delete_cmd(args, node)
 
                 # Here we accept internode messages
                 elif cmd == 'join':
-                    print('Received join command from ' + str(sender))
+                    print('[node-%d] Received join command from %d' % (node['n'], sender))
                     dht_join(args, node)
                 elif cmd == 'depart':
-                    print('Received depart command from ' + str(sender))
+                    print('[node-%d] Received depart command from %d' % (node['n'], sender))
                     dht_depart(args, node)
                 elif cmd == 'keys':
-                    print('Received keys from ' + str(sender))
+                    print('[node-%d] Received keys from %d' % (node['n'], sender))
                     node = dht_keys(args, node)
                 elif cmd == 'answer':
-                    print('Received answer from ' + str(sender))
-                    dht_answer(args, sender)
+                    print('[node-%d] Received answer from %d' % (node['n'], sender))
+                    dht_answer(args, sender, node)
                 else:
-                    print('Received unknown response from ' + str(sender))
+                    print('[node-%d] Received unknown response from %d' % (node['n'], sender))
 
             except Exception as e:
                 print(e)
@@ -96,12 +96,12 @@ try:
                 conn.close()
 
 except KeyboardInterrupt:
-    print('\nReceived keyboard interrupt...')
-    print('Shutting down gracefully...')
+    print('\n[node-%d] Received keyboard interrupt...' % (node['n']))
+    print('[node-%d] Shutting down gracefully...' % (node['n']))
 
     for active_socket in active_sockets:
         active_socket.close()
-    print('Sockets have been closed')
+    print('[node-%d] Sockets have been closed' % (node['n']))
     os.remove('/var/run/dsemu/' + sys.argv[1])
-    print('Listening token has been deleted successfuly')
+    print('[node-%d] Listening token has been deleted successfuly' % (node['n']))
     sys.exit(130)
