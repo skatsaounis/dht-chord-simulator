@@ -1,4 +1,5 @@
 #include "daemon-backend.hpp"
+#include "globals.hpp"
 #include "utils.hpp"
 #include <unistd.h>
 #include <sys/socket.h>
@@ -8,6 +9,7 @@
 #include <iostream>
 #include <cstring>
 #include <system_error>
+#include <thread>
 #include <json.hpp>
 
 using namespace std;
@@ -15,31 +17,58 @@ using json = nlohmann::json;
 
 /// Send a message to a node.
 void Daemon::_send_message(const string& node_id, const string& msg) const {
+    const string node_sock_path = socket_dir + node_id;
+
     int sfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sfd == -1) throw system_error(errno, system_category(), "Cannot create socket");
 
     struct sockaddr_un saddr;
     memset(&saddr, 0, sizeof(struct sockaddr_un));
     saddr.sun_family = AF_UNIX;
-    strncpy(saddr.sun_path, ("/var/run/dsemu/" + node_id).c_str(), sizeof(saddr.sun_path) - 1);
+    strncpy(saddr.sun_path, node_sock_path.c_str(), sizeof(saddr.sun_path) - 1);
 
     int ret = connect(sfd, (struct sockaddr*) &saddr, sizeof(saddr));
-    if (ret < 0) throw system_error(errno, system_category(), "Cannot connect to node socket");
+    if (ret < 0) throw system_error(errno, system_category(), "Cannot connect to node socket " + node_sock_path);
 
     int n = write(sfd, msg.c_str(), msg.length());
-    if (n < 0) throw system_error(errno, system_category(), "Cannot write message to node socket");
+    if (n < 0) throw system_error(errno, system_category(), "Cannot write message to node socket " + node_sock_path);
 
      shutdown(sfd, SHUT_RDWR);
 }
 
 /// Send message for graceful termination to a node.
 void Daemon::_send_terminate(const string& node_id) const {
+    threads.emplace_back(&Daemon::_send_terminate_proc, this, node_id);
+}
+
+/// Detachable concurrent process for sending termination message
+/// to a node when the termination action becomes available.
+void Daemon::_send_terminate_proc(const string& node_id) const try {
     json jmsg = {
         {"cmd", "depart-cmd"},
         {"sender", "daemon-socket-id"},
         {"args", ""}
     };
+    bool prev_term_succ = node_termination_mutex.try_lock_for(chrono::milliseconds(1000));
+    if (!prev_term_succ) _force_node_cleanup(_node_being_terminated, "Node unresponsive during termination.");
+    _node_being_terminated = node_id;
     _send_message(node_id, jmsg.dump());
+} catch (const exception& e) {
+    cerr << "Error during the termination of node " << node_id << ':' << endl;
+    print_exception(e);
+}
+
+/// Immediately halt a node and force the cleanup of its elements.
+void Daemon::_force_node_cleanup(const string& node_id) const {
+    //TODO kill node process
+    unlink((socket_dir + node_id).c_str());
+}
+
+/// Immediately halt a node and force the cleanup of its elements.
+/// Explain the reason of termination with an error message.
+void Daemon::_force_node_cleanup(const string& node_id, const string& reason) const {
+    cerr << "Killing node " << node_id << ": " << reason << endl;
+    _force_node_cleanup(node_id);
 }
 
 /// Select a random active node.
@@ -68,6 +97,7 @@ string Daemon::_pick_random_node() try {
     throw_with_nested(runtime_error("While selecting a random node"));
 }
 
+/// Select a random active node, except the one specified.
 string Daemon::_pick_random_node(const string& node_id) try {
     if (node_ids.empty()) throw runtime_error("There are no active nodes");
     node_ids.at(node_id);
@@ -99,6 +129,9 @@ void Daemon::terminate() {
         print_exception(e);
     }
     node_ids.clear();
+    // Finish any remaining jobs.
+    for (auto& t: threads)
+        t.join();
 }
 
 /// Initialize a node.
@@ -236,4 +269,8 @@ void Daemon::remove(const string& key) try {
     _send_message(_pick_random_node(), jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While deleting key " + key));
+}
+
+void Daemon::notify(const string& action) {
+    if (action == "depart") node_termination_mutex.unlock();
 }
