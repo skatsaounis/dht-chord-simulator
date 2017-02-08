@@ -1,19 +1,40 @@
 #include "daemon-backend.hpp"
 #include "globals.hpp"
+#include "commands.hpp"
 #include "utils.hpp"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sstream>
 #include <string>
 #include <random>
 #include <iostream>
 #include <cstring>
 #include <system_error>
-#include <thread>
 #include <json.hpp>
 
 using namespace std;
 using json = nlohmann::json;
+
+string Daemon::get_message() const {
+    // Accept incoming connection
+    struct sockaddr_un cliaddr;
+    socklen_t cliaddr_size = sizeof(cliaddr);
+    int csfd = accept(sfd, (struct sockaddr*) &cliaddr, &cliaddr_size);
+    if (csfd == -1) throw system_error(errno, system_category(), "Could not accept incoming connection");
+    // Receive request
+    stringstream ss;
+    while (true) {
+        char buffer[256];
+        int n_read = read(csfd, buffer, 255);
+        if (n_read < 0) throw system_error(errno, system_category(), "Read error from client socket");
+        if (n_read == 0) break;
+        buffer[n_read] = '\0';
+        string chunk = buffer;
+        ss << chunk;
+    }
+    return ss.str();
+}
 
 /// Send a message to a node.
 void Daemon::_send_message(const string& node_id, const string& msg) const {
@@ -37,38 +58,21 @@ void Daemon::_send_message(const string& node_id, const string& msg) const {
 }
 
 /// Send message for graceful termination to a node.
-void Daemon::_send_terminate(const string& node_id) const {
-    threads.emplace_back(&Daemon::_send_terminate_proc, this, node_id);
-}
-
-/// Detachable concurrent process for sending termination message
-/// to a node when the termination action becomes available.
-void Daemon::_send_terminate_proc(const string& node_id) const try {
+void Daemon::_send_terminate(const string& node_id) const try {
     json jmsg = {
         {"cmd", "depart-cmd"},
         {"sender", "daemon-socket-id"},
         {"args", ""}
     };
-    bool prev_term_succ = node_termination_mutex.try_lock_for(chrono::milliseconds(1000));
-    if (!prev_term_succ) _force_node_cleanup(_node_being_terminated, "Node unresponsive during termination.");
-    _node_being_terminated = node_id;
     _send_message(node_id, jmsg.dump());
+    while(true) {
+        auto msg = get_message();
+        auto vars = json::parse(msg);
+        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "depart") break;
+    }
 } catch (const exception& e) {
     cerr << "Error during the termination of node " << node_id << ':' << endl;
     print_exception(e);
-}
-
-/// Immediately halt a node and force the cleanup of its elements.
-void Daemon::_force_node_cleanup(const string& node_id) const {
-    //TODO kill node process
-    unlink((socket_dir + node_id).c_str());
-}
-
-/// Immediately halt a node and force the cleanup of its elements.
-/// Explain the reason of termination with an error message.
-void Daemon::_force_node_cleanup(const string& node_id, const string& reason) const {
-    cerr << "Killing node " << node_id << ": " << reason << endl;
-    _force_node_cleanup(node_id);
 }
 
 /// Select a random active node.
@@ -109,6 +113,30 @@ string Daemon::_pick_random_node(const string& node_id) try {
     throw_with_nested(runtime_error("While removing node from random selection"));
 }
 
+Daemon::Daemon() {
+    int ret = daemon(0, 1);
+    if (ret == -1) throw system_error(errno, system_category(), "Cannot daemonize process.");
+
+    sfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sfd == -1) throw system_error(errno, system_category(), "Cannot create initial socket.");
+
+    struct sockaddr_un saddr;
+    memset(&saddr, 0, sizeof(struct sockaddr_un));
+    saddr.sun_family = AF_UNIX;
+    strncpy(saddr.sun_path, socket_path.c_str(), sizeof(saddr.sun_path) - 1);
+
+    ret = bind(sfd, (struct sockaddr*) &saddr, sizeof(struct sockaddr_un));
+    if (ret == -1) throw system_error(errno, system_category(), "Cannot bind initial socket to file.");
+
+    ret = listen(sfd, 50);
+    if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
+}
+
+Daemon::~Daemon() {
+    shutdown(sfd, SHUT_RDWR);
+    unlink(socket_path.c_str());
+}
+
 /// Check whether the daemon is running,
 /// and able to process requests.
 bool Daemon::is_running() const {
@@ -129,9 +157,6 @@ void Daemon::terminate() {
         print_exception(e);
     }
     node_ids.clear();
-    // Finish any remaining jobs.
-    for (auto& t: threads)
-        t.join();
 }
 
 /// Initialize a node.
@@ -210,10 +235,10 @@ void Daemon::join(const string& node_id) try {
         {"cmd", "join-cmd"},
         {"sender", "daemon-socket-id"},
         {"args", {
-            {"socket_fd", node_id}
+            {"socket_fd", _pick_random_node(node_id)}
         }}
     };
-    _send_message(_pick_random_node(node_id), jmsg.dump());
+    _send_message(node_id, jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("On join of node " + node_id));
 }
@@ -235,6 +260,11 @@ void Daemon::query(const string& key) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
+    while(true) {
+        auto msg = get_message();
+        auto vars = json::parse(msg);
+        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "query") break;
+    }
 } catch(const exception&) {
     throw_with_nested(runtime_error("While querying key " + key));
 }
@@ -251,6 +281,11 @@ void Daemon::insert(const string& key, const string& value) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
+    while(true) {
+        auto msg = get_message();
+        auto vars = json::parse(msg);
+        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "insert") break;
+    }
 } catch(const exception&) {
     throw_with_nested(runtime_error("While inserting key " + key + " with value " + value));
 }
@@ -267,10 +302,11 @@ void Daemon::remove(const string& key) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
+    while(true) {
+        auto msg = get_message();
+        auto vars = json::parse(msg);
+        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "delete") break;
+    }
 } catch(const exception&) {
     throw_with_nested(runtime_error("While deleting key " + key));
-}
-
-void Daemon::notify(const string& action) {
-    if (action == "depart") node_termination_mutex.unlock();
 }

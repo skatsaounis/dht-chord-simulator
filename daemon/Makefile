@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = --std=c++11 -pthread -I../include
+CXXFLAGS = --std=c++11 -Wall -I../include
 RM = @rm -f
 
 .PHONY: clean
