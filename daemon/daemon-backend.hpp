@@ -1,6 +1,7 @@
 #ifndef _DSEMU_DAEMON_BACKEND_HPP_
 #define _DSEMU_DAEMON_BACKEND_HPP_
 
+#include "commands.hpp"
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -13,6 +14,7 @@ class Daemon {
 
     void _send_message(const std::string& node_id, const std::string& msg) const;
     void _send_terminate(const std::string& node_id) const;
+    void _wait_for_notify(Commands) const;
     std::string _pick_random_node();
     std::string _pick_random_node(const std::string& excluded_node_id);
 

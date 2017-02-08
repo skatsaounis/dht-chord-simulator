@@ -57,6 +57,21 @@ void Daemon::_send_message(const string& node_id, const string& msg) const {
      shutdown(sfd, SHUT_RDWR);
 }
 
+/// Block until a notification is sent about
+/// the completion of the specified task.
+void Daemon::_wait_for_notify(Commands command) const try {
+    while(true) {
+        auto msg = get_message();
+        auto vars = json::parse(msg);
+        if (vars.at("cmd") == "notify-daemon" &&
+            to_command_enum(vars.at("action")) == command)
+            break;
+    }
+} catch (const exception&) {
+    throw_with_nested(runtime_error("While waiting for command completion notification"));
+}
+
+
 /// Send message for graceful termination to a node.
 void Daemon::_send_terminate(const string& node_id) const try {
     json jmsg = {
@@ -65,11 +80,7 @@ void Daemon::_send_terminate(const string& node_id) const try {
         {"args", ""}
     };
     _send_message(node_id, jmsg.dump());
-    while(true) {
-        auto msg = get_message();
-        auto vars = json::parse(msg);
-        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "depart") break;
-    }
+    _wait_for_notify(Commands::Depart);
 } catch (const exception& e) {
     cerr << "Error during the termination of node " << node_id << ':' << endl;
     print_exception(e);
@@ -273,11 +284,7 @@ void Daemon::query(const string& key) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
-    while(true) {
-        auto msg = get_message();
-        auto vars = json::parse(msg);
-        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "query") break;
-    }
+    _wait_for_notify(Commands::Query);
 } catch(const exception&) {
     throw_with_nested(runtime_error("While querying key " + key));
 }
@@ -294,11 +301,7 @@ void Daemon::insert(const string& key, const string& value) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
-    while(true) {
-        auto msg = get_message();
-        auto vars = json::parse(msg);
-        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "insert") break;
-    }
+    _wait_for_notify(Commands::Insert);
 } catch(const exception&) {
     throw_with_nested(runtime_error("While inserting key " + key + " with value " + value));
 }
@@ -315,11 +318,7 @@ void Daemon::remove(const string& key) try {
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
-    while(true) {
-        auto msg = get_message();
-        auto vars = json::parse(msg);
-        if (vars.at("cmd") == "notify-daemon" && vars.at("action") == "delete") break;
-    }
+    _wait_for_notify(Commands::Delete);
 } catch(const exception&) {
     throw_with_nested(runtime_error("While deleting key " + key));
 }
