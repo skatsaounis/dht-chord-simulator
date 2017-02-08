@@ -133,15 +133,15 @@ void Options::parse(int argc, char** argv) try {
         case Commands::Query: {
                 CmdLine params("Distributed Systems Emulator: Query command");
                 params.setExceptionHandling(false);
-                ValueArg<string> key("k", "key", "Key to query from the chord", true, 0, "String", params);
+                ValueArg<string> key("k", "key", "Key to query from the chord", true, "", "String", params);
                 params.parse(parameters);
                 _m_key = key.getValue();
             }   break;
         case Commands::Insert: {
                 CmdLine params("Distributed Systems Emulator: Insert command");
                 params.setExceptionHandling(false);
-                ValueArg<string> key("k", "key", "Key to be added to the chord", true, 0, "String", params);
-                ValueArg<string> value("v", "value", "Value to be associated with the key", true, 0, "String", params);
+                ValueArg<string> key("k", "key", "Key to be added to the chord", true, "", "String", params);
+                ValueArg<string> value("v", "value", "Value to be associated with the key", true, "", "String", params);
                 params.parse(parameters);
                 _m_key = key.getValue();
                 _m_value = value.getValue();
@@ -149,7 +149,7 @@ void Options::parse(int argc, char** argv) try {
         case Commands::Delete: {
                 CmdLine params("Distributed Systems Emulator: Delete command");
                 params.setExceptionHandling(false);
-                ValueArg<string> key("k", "key", "Key to delete from the chord", true, 0, "String", params);
+                ValueArg<string> key("k", "key", "Key to delete from the chord", true, "", "String", params);
                 params.parse(parameters);
                 _m_key = key.getValue();
             }   break;

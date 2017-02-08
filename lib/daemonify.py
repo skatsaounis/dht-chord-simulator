@@ -88,12 +88,20 @@ def insert_cmd(args, node):
             (node['n'] < int(key) and int(key) > node['predecessor']) or
             (node['n'] > int(key) and int(key) < node['predecessor'])
         )
+    ) or (
+        node['n'] == node['predecessor']
     ):
         # write key to my keys
         node['keys'].update({key: value})
 
         # send answer if eventual
-        if node['consistency'] == 'eventual':
+        if (
+            node['consistency'] == 'eventual'
+        ) or (
+            node['n'] == node['predecessor']
+        ) or (
+            node['replica_factor'] == 1
+        ):
             answer = {
                 'cmd': 'answer',
                 'sender': node['n'],
