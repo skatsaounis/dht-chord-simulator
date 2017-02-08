@@ -12,6 +12,8 @@ string to_string(ConsistencyTypes c) {
             return "linear";
         case ConsistencyTypes::Eventual:
             return "eventual";
+        default:
+            throw runtime_error("No string found for consistency enum");
     }
 }
 
