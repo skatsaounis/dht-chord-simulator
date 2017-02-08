@@ -13,6 +13,10 @@ clean:
 	@$(MAKE) -C daemon/ clean
 	$(RM) dsemu
 
+kill:
+	@pkill -f dsemu
+	$(RM) /var/run/dsemu/*
+
 install: dsemu
 	@$(MAKE) -C scripts-install/ install
 
