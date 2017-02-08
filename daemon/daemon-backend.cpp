@@ -143,6 +143,18 @@ bool Daemon::is_running() const {
     return _m_is_running;
 }
 
+/// Get the replica factor for this session.
+unsigned Daemon::get_replica_factor() const {
+    return _m_replica_factor;
+}
+
+/// Set the replica factor for this session.
+void Daemon::set_replica_factor(unsigned r) {
+    if (get_replica_factor() == r) return;
+    _m_replica_factor = r;
+    cout << "[daemon] Replica factor set to " << get_replica_factor() << endl;
+}
+
 /// Terminate the daemon instance,
 /// releasing all nodes.
 void Daemon::terminate() {
@@ -192,6 +204,7 @@ void Daemon::init_node(const string& node_id, const string& replica_factor, cons
     }
     else if (pid > 0) {
         node_ids[node_id] = stoi(node_id);
+        set_replica_factor(stoi(replica_factor));
         cout << "[daemon] Initialized node " << node_id << endl;
     }
     else
@@ -256,7 +269,7 @@ void Daemon::query(const string& key) try {
         {"args", {
             {"initial_sender", "daemon"},
             {"key", key},
-            {"replica_counter", 2}  //FIXME 1.0
+            {"replica_counter", get_replica_factor()}
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());
@@ -298,7 +311,7 @@ void Daemon::remove(const string& key) try {
         {"args", {
             {"initial_sender", "daemon"},
             {"key", key},
-            {"replica_counter", 2}  //FIXME 1.0
+            {"replica_counter", get_replica_factor()}
         }}
     };
     _send_message(_pick_random_node(), jmsg.dump());

@@ -8,6 +8,7 @@
 class Daemon {
     int sfd = 0;
     bool _m_is_running = true;
+    unsigned _m_replica_factor = 0;
     std::unordered_map<std::string, unsigned> node_ids;
 
     void _send_message(const std::string& node_id, const std::string& msg) const;
@@ -22,6 +23,8 @@ public:
 
     bool is_running() const;
     std::string get_message() const;
+    unsigned get_replica_factor() const;
+    void set_replica_factor(unsigned);
 
     void terminate();
     void init_node(const std::string& node_id, const std::string& replica_factor, const std::string& consistency);
