@@ -83,7 +83,7 @@ try:
 
                 # Here we accept internode messages
                 elif cmd == 'join':
-                    print('[node-%d] Received join command from %d' % (node['n'], sender))
+                    print('[node-%d] Received join command from %d with type %s' % (node['n'], sender, args['type']))
                     dht_join(args, node)
                 elif cmd == 'depart':
                     print('[node-%d] Received depart command from %d' % (node['n'], sender))
