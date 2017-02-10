@@ -165,11 +165,32 @@ def dht_keys(args, node):
     cmd_type = args['type']
     initial_sender = args['initial_sender']
 
+    if (cmd_type == 'depart') and (node['n'] != initial_sender):
+        new_keys = {}
+        for key, value in keys:
+            if key in node['keys']:
+                new_keys.update({key: value})
+
+        if new_keys:
+            send_keys = {
+                'cmd': 'keys',
+                'sender': node['n'],
+                'args': {
+                    'keys': new_keys,
+                    'replica_counter': 'dummy_value',
+                    'type': cmd_type,
+                    'initial_sender': initial_sender
+                }
+            }
+            sending_socket = create_socket(node['successor'])
+            sending_socket.sendall(send_message(send_keys))
+            sending_socket.close()
+
     # update keys
     node['keys'].update(keys)
 
-    # forward replicas
-    if replica_counter > 1:
+    # forward replicas when inserting new key
+    if (replica_counter > 1) and (cmd_type == 'insert') and (node['n'] != initial_sender):
         send_keys = {
             'cmd': 'keys',
             'sender': node['n'],

@@ -40,7 +40,7 @@ def depart_cmd(node):
             'keys': node['keys'],
             'replica_counter': node['replica_factor'] - 1,
             'type': 'depart',
-            'initial_sender': 'dummy_value'
+            'initial_sender': node['predecessor']
         }
     }
     sending_socket = create_socket(node['successor'])
