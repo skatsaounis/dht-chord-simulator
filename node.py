@@ -75,7 +75,7 @@ try:
                     print('[node-%d] Received insert key command' % (node['n']))
                     node = insert_cmd(args, node)
                 elif cmd == 'query-cmd':
-                    print('[node-%d] Received daemon query command' % (node['n']))
+                    print('[node-%d] Received query command' % (node['n']))
                     query_cmd(args, node)
                 elif cmd == 'delete-cmd':
                     print('[node-%d] Received daemon delete command' % (node['n']))

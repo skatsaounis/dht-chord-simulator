@@ -210,7 +210,13 @@ def query_cmd(args, node):
             next_socket.close()
 
     # key not found in chord ring
-    elif (node['n'] == initial_sender) and (sender != 'daemon'):
+    elif (
+        (
+            (node['n'] == initial_sender) and (sender != 'daemon')
+        ) or (
+            node['n'] == node['successor']
+        )
+    ):
         # send answer to initial node
         answer = {
             'cmd': 'answer',
