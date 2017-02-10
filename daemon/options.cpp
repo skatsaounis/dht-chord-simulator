@@ -75,7 +75,7 @@ void Options::parse(int argc, char** argv) try {
                 CmdLine params("Distributed Systems Emulator: Start command");
                 params.setExceptionHandling(false);
                 ValueArg<unsigned> node_id("n", "node", "ID of the node to initialize", true, 0, "Integer", params);
-                ValueArg<unsigned> n_replicas("r", "replicas", "Number of replicas of the DHT values", false, 1, "Integer", params);
+                ValueArg<unsigned> n_replicas("r", "replicas", "Number of replicas of the DHT values", false, 0, "Integer", params);
                 vector<string> consistency_types{"linear", "eventual"};
                 ValuesConstraint<string> allowed_consistency(consistency_types);
                 ValueArg<string> consistency("c", "consistency", "Type of consistency", false, "linear", &allowed_consistency, params);
