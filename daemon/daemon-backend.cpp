@@ -156,11 +156,13 @@ bool Daemon::is_running() const {
 
 /// Get the replica factor for this session.
 unsigned Daemon::get_replica_factor() const {
+    if (_m_replica_factor == 0) return 1;  // default value
     return _m_replica_factor;
 }
 
 /// Set the replica factor for this session.
 void Daemon::set_replica_factor(unsigned r) {
+    if (r == 0) return;  // 0 means, do not change
     if (get_replica_factor() == r) return;
     _m_replica_factor = r;
     cout << "[daemon] Replica factor set to " << get_replica_factor() << endl;
@@ -183,7 +185,10 @@ void Daemon::terminate() {
 }
 
 /// Initialize a node.
-void Daemon::init_node(const string& node_id, const string& replica_factor, const string& consistency) try {
+void Daemon::init_node(const string& node_id, const string& n_replicas, const string& consistency) try {
+    set_replica_factor(stoi(n_replicas));
+    string replica_factor(to_string(get_replica_factor()));
+
     char command[31];
     strncpy(command, "/usr/local/share/dsemu/node.py", sizeof(command));
 
@@ -215,7 +220,6 @@ void Daemon::init_node(const string& node_id, const string& replica_factor, cons
     }
     else if (pid > 0) {
         node_ids[node_id] = stoi(node_id);
-        set_replica_factor(stoi(replica_factor));
         cout << "[daemon] Initialized node " << node_id << endl;
     }
     else
