@@ -263,9 +263,11 @@ def delete_cmd(args, node):
 
         # first node sends answer to initial sender
         if (
-            replica_counter == node['replica_factor']
-        ) and (
-            node['consistency'] == 'eventual'
+            (
+                (replica_counter == node['replica_factor']) and (node['consistency'] == 'eventual')
+            ) or (
+                (node['successor'] == initial_sender) and (node['consistency'] == 'linear')
+            )
         ):
             # send answer to initial node
             answer = {
@@ -281,37 +283,44 @@ def delete_cmd(args, node):
             next_socket.close()
 
         # also delete replicas -- forward delete to successor on chord ring
-        if replica_counter > 1:
-            delete_key = {
-                'cmd': 'delete-cmd',
-                'sender': node['n'],
-                'args': {
-                    'initial_sender': initial_sender,
-                    'key': key,
-                    'replica_counter': replica_counter - 1
+        if node['successor'] != initial_sender:
+            if (replica_counter > 1):
+                delete_key = {
+                    'cmd': 'delete-cmd',
+                    'sender': node['n'],
+                    'args': {
+                        'initial_sender': initial_sender,
+                        'key': key,
+                        'replica_counter': replica_counter - 1
+                    }
                 }
-            }
-            next_socket = create_socket(node['successor'])
-            next_socket.sendall(send_message(delete_key))
-            next_socket.close()
+                next_socket = create_socket(node['successor'])
+                next_socket.sendall(send_message(delete_key))
+                next_socket.close()
 
-        # all replicas deleted -- inform initial sender
-        elif node['consistency'] == 'linear':
-            # send answer to initial node
-            answer = {
-                'cmd': 'answer',
-                'sender': node['n'],
-                'args': {
-                    'type': 'delete',
-                    'value': node['keys'][key]
+            # all replicas deleted -- inform initial sender
+            elif (node['consistency'] == 'linear'):
+                # send answer to initial node
+                answer = {
+                    'cmd': 'answer',
+                    'sender': node['n'],
+                    'args': {
+                        'type': 'delete',
+                        'value': node['keys'][key]
+                    }
                 }
-            }
-            next_socket = create_socket(initial_sender)
-            next_socket.sendall(send_message(answer))
-            next_socket.close()
+                next_socket = create_socket(initial_sender)
+                next_socket.sendall(send_message(answer))
+                next_socket.close()
 
     # key not found in chord ring
-    elif (node['n'] == initial_sender) and (sender != 'daemon'):
+    elif (
+        (
+            (node['n'] == initial_sender) and (sender != 'daemon')
+        ) or (
+            node['n'] == node['successor']
+        )
+    ):
 
         # send answer to initial node
         answer = {

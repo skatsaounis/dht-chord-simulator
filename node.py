@@ -78,7 +78,7 @@ try:
                     print('[node-%d] Received query command' % (node['n']))
                     query_cmd(args, node)
                 elif cmd == 'delete-cmd':
-                    print('[node-%d] Received daemon delete command' % (node['n']))
+                    print('[node-%d] Received delete command' % (node['n']))
                     node = delete_cmd(args, node)
 
                 # Here we accept internode messages
