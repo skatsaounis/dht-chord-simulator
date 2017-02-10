@@ -167,7 +167,7 @@ def dht_keys(args, node):
 
     if (cmd_type == 'depart') and (node['n'] != initial_sender):
         new_keys = {}
-        for key, value in keys:
+        for key, value in keys.items():
             if key in node['keys']:
                 new_keys.update({key: value})
 
