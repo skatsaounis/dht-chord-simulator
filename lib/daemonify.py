@@ -247,7 +247,7 @@ def query_cmd(args, node):
 
 
 def delete_cmd(args, node):
-    key = args['key']
+    key = int(args['key'])
     sender = args['initial_sender']
     replica_counter = int(args['replica_counter'])
 
@@ -349,3 +349,5 @@ def delete_cmd(args, node):
         next_socket = create_socket(node['successor'])
         next_socket.sendall(send_message(delete_key))
         next_socket.close()
+
+    return node
