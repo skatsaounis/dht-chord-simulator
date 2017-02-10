@@ -56,11 +56,13 @@ def dht_join(args, node):
         elif (
             (
                 node['n'] < node_id and
-                node_id < node['successor'] and
-                node['n'] < node['successor']
+                node_id < node['successor']
             ) or (
                 node['n'] > node['successor'] and
-                node_id < node['n']
+                node_id < node['successor']
+            ) or (
+                node['n'] > node['successor'] and
+                node_id > node['n']
             )
         ):
             join_response = {
