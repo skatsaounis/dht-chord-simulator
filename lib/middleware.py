@@ -16,10 +16,10 @@ def send_message(message):
 def create_socket(socket_name, init=False):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     if init:
-        s.bind("/var/run/dsemu/" + str(socket_name))
+        s.bind("/var/run/dsemu/" + socket_name)
         s.listen(1)
     else:
-        s.connect("/var/run/dsemu/" + str(socket_name))
+        s.connect("/var/run/dsemu/" + socket_name)
     return s
 
 

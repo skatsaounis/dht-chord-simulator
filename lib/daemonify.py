@@ -2,7 +2,7 @@ from middleware import create_socket, send_message
 
 
 def join_cmd(args, node):
-    socket_fd = int(args['socket_fd'])
+    socket_fd = args['socket_fd']
     join_find = {
         'cmd': 'join',
         'sender': node['n'],
@@ -55,12 +55,12 @@ def depart_cmd(node):
 
 
 def list_cmd(node):
-    print('Current node: ' + str(node['n']))
+    print('Current node: ' + node['n'])
     if node['n'] == node['predecessor']:
         print('No other node in the ring')
     else:
-        print('Next node: ' + str(node['successor']))
-        print('Previous node: ' + str(node['predecessor']))
+        print('Next node: ' + node['successor'])
+        print('Previous node: ' + node['predecessor'])
     print('Current node replica factor: ' + str(node['replica_factor']))
     print('Current node consistency: ' + node['consistency'])
     print('Current node keys: ' + str(node['keys']))
@@ -78,15 +78,15 @@ def insert_cmd(args, node):
         initial_sender = sender
 
     if (
-        node['n'] == int(key)
+        node['n'] == key
     ) or (
-        node['n'] > int(key) and
-        int(key) > node['predecessor']
+        node['n'] > key and
+        key > node['predecessor']
     ) or (
         node['n'] < node['predecessor'] and
         (
-            (node['n'] < int(key) and int(key) > node['predecessor']) or
-            (node['n'] > int(key) and int(key) < node['predecessor'])
+            (node['n'] < key and key > node['predecessor']) or
+            (node['n'] > key and key < node['predecessor'])
         )
     ) or (
         node['n'] == node['predecessor']
@@ -152,7 +152,7 @@ def insert_cmd(args, node):
 def query_cmd(args, node):
     key = args['key']
     sender = args['initial_sender']
-    replica_counter = int(args['replica_counter'])
+    replica_counter = args['replica_counter']
 
     # keep track which node was initially selected by daemon
     if sender == 'daemon':
@@ -247,9 +247,9 @@ def query_cmd(args, node):
 
 
 def delete_cmd(args, node):
-    key = int(args['key'])
+    key = args['key']
     sender = args['initial_sender']
-    replica_counter = int(args['replica_counter'])
+    replica_counter = args['replica_counter']
 
     # keep track which node was initially selected by daemon
     if sender == 'daemon':
