@@ -27,3 +27,8 @@ def hash_fun(node_id):
     m = hashlib.sha1()
     m.update(node_id)
     return m.hexdigest()
+
+
+def debug(message, verbose=1):
+    if verbose > 0:
+        print(message)

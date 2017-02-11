@@ -14,6 +14,10 @@ bool Options::was_node_specified() const noexcept {
     return _m_was_node_specified;
 }
 
+bool Options::verbose() const noexcept {
+    return _m_verbose;
+}
+
 Commands Options::command() const noexcept {
     return _m_command;
 }
@@ -69,18 +73,21 @@ void Options::parse(int argc, char** argv) try {
             cmd.getOutput()->version(cmd);
             exit(EXIT_SUCCESS);
         case Commands::Start:
-            if (parameters.empty())
+            if (parameters.empty()) {
                 _m_was_node_specified = false;
-            else {
+            } else {
                 CmdLine params("Distributed Systems Emulator: Start command");
                 params.setExceptionHandling(false);
-                ValueArg<unsigned> node_id("n", "node", "ID of the node to initialize", true, 0, "Integer", params);
+                SwitchArg verbose("v", "verbose", "Whether to print extra debug messages");
+                ValueArg<unsigned> node_id("n", "node", "ID of the node to initialize", false, 0, "Integer");
+                params.xorAdd(verbose, node_id);
                 ValueArg<unsigned> n_replicas("r", "replicas", "Number of replicas of the DHT values", false, 0, "Integer", params);
                 vector<string> consistency_types{"linear", "eventual"};
                 ValuesConstraint<string> allowed_consistency(consistency_types);
                 ValueArg<string> consistency("c", "consistency", "Type of consistency", false, "linear", &allowed_consistency, params);
                 params.parse(parameters);
-                _m_was_node_specified = true;
+                _m_was_node_specified = node_id.isSet();
+                _m_verbose = verbose.getValue();
                 _m_node = node_id.getValue();
                 _m_n_replicas = n_replicas.getValue();
                 _m_consistency = to_consistency_enum(consistency.getValue());
@@ -104,7 +111,7 @@ void Options::parse(int argc, char** argv) try {
             else {
                 CmdLine params("Distributed Systems Emulator: List command");
                 params.setExceptionHandling(false);
-                vector<string> list_modes{"simple", "ring"};
+                vector<string> list_modes{"simple", "ring", "*"};
                 ValuesConstraint<string> allowed_list_modes(list_modes);
                 UnlabeledValueArg<string> list_mode("mode", "Mode of list operation", false, "simple", &allowed_list_modes, params);
                 ValueArg<unsigned> node_id("n", "node", "ID of the node to list information", false, 0, "Integer", params);
@@ -112,6 +119,8 @@ void Options::parse(int argc, char** argv) try {
                 _m_was_node_specified = node_id.isSet();
                 _m_list_mode = list_mode.getValue();
                 _m_node = node_id.getValue();
+                if (was_node_specified() && this->list_mode() != "ring")
+                    throw ArgException("Usage: dsemu <list | list ring -n <id> | *>");
             }
             break;
         case Commands::Join: {

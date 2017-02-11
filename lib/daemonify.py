@@ -1,4 +1,4 @@
-from middleware import create_socket, send_message
+from middleware import create_socket, send_message, debug
 
 
 def join_cmd(args, node):
@@ -55,15 +55,15 @@ def depart_cmd(node):
 
 
 def list_cmd(node):
-    print('Current node: ' + node['n'])
+    debug('Current node: ' + node['n'])
     if node['n'] == node['predecessor']:
-        print('No other node in the ring')
+        debug('No other node in the ring', node['verbose'])
     else:
-        print('Next node: ' + node['successor'])
-        print('Previous node: ' + node['predecessor'])
-    print('Current node replica factor: ' + str(node['replica_factor']))
-    print('Current node consistency: ' + node['consistency'])
-    print('Current node keys: ' + str(node['keys']))
+        debug('Next node: ' + node['successor'], node['verbose'])
+        debug('Previous node: ' + node['predecessor'], node['verbose'])
+    debug('Current node replica factor: ' + str(node['replica_factor']), node['verbose'])
+    debug('Current node consistency: ' + node['consistency'], node['verbose'])
+    debug('Current node keys: ' + str(node['keys']))
 
 
 def insert_cmd(args, node):

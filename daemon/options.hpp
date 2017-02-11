@@ -8,6 +8,7 @@ class Options
 {
     Commands _m_command;
     bool _m_was_node_specified = false;
+    bool _m_verbose = false;
     unsigned _m_node;
     unsigned _m_n_replicas = 1;
     ConsistencyTypes _m_consistency = ConsistencyTypes::Linear;
@@ -17,6 +18,7 @@ class Options
 
 public:
     bool was_node_specified() const noexcept;
+    bool verbose() const noexcept;
 
     Commands command() const noexcept;
     unsigned node() const;

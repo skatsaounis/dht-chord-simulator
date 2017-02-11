@@ -29,10 +29,12 @@ public:
     void set_replica_factor(unsigned);
 
     void terminate();
-    void init_node(const std::string& node_id, const std::string& replica_factor, const std::string& consistency);
+    void init_node(const std::string& node_id, const std::string& replica_factor,
+        const std::string& consistency, unsigned verbosity);
     void terminate_node(const std::string& node_id);
     void list_nodes();
     void list_ring(const std::string& node_id);
+    void list_all_nodes();
     void join(const std::string& node_id);
     void depart(const std::string& node_id);
     void query(const std::string& key);

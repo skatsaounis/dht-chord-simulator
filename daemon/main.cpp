@@ -37,7 +37,7 @@ int main(int argc, char** argv) try {
             } else {
                 // Start daemon
                 if (!daemon.isRunning())
-                    daemon.start();
+                    daemon.start(options.verbose());
             } break;
         case Commands::Terminate:
             if (options.was_node_specified()) {
@@ -56,6 +56,8 @@ int main(int argc, char** argv) try {
                 daemon.list_nodes();
             else if (options.list_mode() == "ring")
                 daemon.list_ring(options.node());
+            else if (options.list_mode() == "*")
+                daemon.list_all_nodes();
             break;
         case Commands::Join:
             check_daemon_running();

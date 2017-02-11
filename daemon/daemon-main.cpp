@@ -15,7 +15,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-void daemon_main() try {
+void daemon_main(bool verbose) try {
     // Main service loop.
     Daemon daemon;
     cout << "[daemon] Starting" << endl;
@@ -31,7 +31,8 @@ void daemon_main() try {
                 break;
             case Commands::Start:
                 // Initialize node
-                daemon.init_node(vars.at("node"), vars.at("replicas"), vars.at("consistency"));
+                daemon.init_node(vars.at("node"), vars.at("replicas"),
+                    vars.at("consistency"), (verbose? 1:0));
                 break;
             case Commands::Terminate: {
                 auto nodeit = vars.find("node");
@@ -49,8 +50,11 @@ void daemon_main() try {
                 if (modeit == vars.end()) {
                     daemon.list_nodes();
                 } else if (*modeit == "ring") {
-                    cerr << "[daemon] Listing node " << vars.at("node");
+                    cout << "[daemon] Listing node " << vars.at("node") << endl;
                     daemon.list_ring(vars.at("node"));
+                } else if (*modeit == "*") {
+                    cout << "[daemon] Listing all nodes" << endl;
+                    daemon.list_all_nodes();
                 }
             }   break;
             case Commands::Join:

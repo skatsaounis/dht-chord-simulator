@@ -1,4 +1,4 @@
-from middleware import create_socket, send_message
+from middleware import create_socket, send_message, debug
 
 
 def dht_send_keys(node):
@@ -144,7 +144,7 @@ def dht_join(args, node):
         node_id = args['node_id']
         node['successor'] = node_id
     else:
-        print('[node-%s] Received unknown join type' % (node['n']))
+        debug('[node-%s] Received unknown join type' % (node['n']), node['verbose'])
     return node
 
 
@@ -157,7 +157,7 @@ def dht_depart(args, node):
         node_id = args['node_id']
         node['successor'] = node_id
     else:
-        print('[node-%s] Received unknown depart type' % (node['n']))
+        debug('[node-%s] Received unknown depart type' % (node['n']), node['verbose'])
     return node
 
 
@@ -227,22 +227,22 @@ def dht_keys(args, node):
 def dht_answer(args, sender, node):
     cmd_type = args['type']
 
-    print('[node-%s] Answer has been received from node %s' % (node['n'], sender))
+    debug('[node-%s] Answer has been received from node %s' % (node['n'], sender), node['verbose'])
 
     if cmd_type == 'insert':
-        print('[node-%s] Key has been inserted' % (node['n']))
+        debug('[node-%s] Key has been inserted' % (node['n']))
 
     elif cmd_type == 'delete':
         if args['value'] != 'nf':
-            print('[node-%s] %s has been deleted' % (node['n'], args['value']))
+            debug('[node-%s] %s has been deleted' % (node['n'], args['value']))
         else:
-            print('[node-%s] Key not found' % (node['n']))
+            debug('[node-%s] Key not found' % (node['n']))
 
     elif cmd_type == 'query':
         if args['value'] != 'nf':
-            print('[node-%s] Answer is %s' % (node['n'], args['value']))
+            debug('[node-%s] Answer is %s' % (node['n'], args['value']))
         else:
-            print('[node-%s] Key not found' % (node['n']))
+            debug('[node-%s] Key not found' % (node['n']))
 
     # notify daemon
     notify_daemon = {

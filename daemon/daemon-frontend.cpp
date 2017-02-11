@@ -65,8 +65,8 @@ void DaemonInterface::status() try {
     throw_with_nested(runtime_error("While sending status report request to daemon"));
 }
 
-void DaemonInterface::start() {
-    daemon_main();
+void DaemonInterface::start(bool verbose) {
+    daemon_main(verbose);
 }
 
 void DaemonInterface::terminate() try {
@@ -92,6 +92,16 @@ void DaemonInterface::list_ring(unsigned node_id) try {
     _send_message(jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While sending node ring list request to daemon"));
+}
+
+void DaemonInterface::list_all_nodes() try {
+    json jmsg = {
+        {"cmd", "list"},
+        {"mode", "*"}
+    };
+    _send_message(jmsg.dump());
+} catch(const exception&) {
+    throw_with_nested(runtime_error("While sending all node list request to daemon"));
 }
 
 void DaemonInterface::init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency) try {

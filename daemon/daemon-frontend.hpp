@@ -16,10 +16,11 @@ public:
 
     bool isRunning();
     void status();
-    void start();
+    void start(bool verbose);
     void terminate();
     void list_nodes();
     void list_ring(unsigned node_id);
+    void list_all_nodes();
     void init_node(unsigned node_id, unsigned n_replicas, ConsistencyTypes consistency);
     void terminate_node(unsigned node_id);
     void join(unsigned node_id);

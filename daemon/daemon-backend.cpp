@@ -185,7 +185,8 @@ void Daemon::terminate() {
 }
 
 /// Initialize a node.
-void Daemon::init_node(const string& node_id, const string& n_replicas, const string& consistency) try {
+void Daemon::init_node(const string& node_id, const string& n_replicas,
+                       const string& consistency, unsigned verbosity) try {
     set_replica_factor(stoi(n_replicas));
     string replica_factor(to_string(get_replica_factor()));
 
@@ -201,11 +202,15 @@ void Daemon::init_node(const string& node_id, const string& n_replicas, const st
     char arg_cons[consistency.length() + 1];
     strncpy(arg_cons, consistency.c_str(), sizeof(arg_cons));
 
+    char arg_verbosity[2];
+    strncpy(arg_verbosity, to_string(verbosity).c_str(), sizeof(arg_verbosity));
+
     char * newargv[] = {
         command,
         arg_id,
         arg_rep,
         arg_cons,
+        arg_verbosity,
         NULL
     };
 
@@ -245,7 +250,7 @@ void Daemon::list_nodes() try {
     throw_with_nested(runtime_error("While printing node list"));
 }
 
-/// Request node ring to list itself in order.
+/// Request status report from a node.
 void Daemon::list_ring(const string& node_id) try {
     json jmsg = {
         {"cmd", "list-cmd"},
@@ -255,6 +260,12 @@ void Daemon::list_ring(const string& node_id) try {
     _send_message(node_id, jmsg.dump());
 } catch(const exception&) {
     throw_with_nested(runtime_error("While requesting ring node listing"));
+}
+
+/// Request status report from all nodes.
+void Daemon::list_all_nodes() {
+    for (auto&& n: node_ids)
+        list_ring(n.first);
 }
 
 /// Request the ring to allow a new node to join.
