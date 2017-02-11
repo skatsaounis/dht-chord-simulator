@@ -76,7 +76,7 @@ void Daemon::_wait_for_notify(Commands command) const try {
 void Daemon::_send_terminate(const string& node_id) const try {
     json jmsg = {
         {"cmd", "depart-cmd"},
-        {"sender", "daemon-socket-id"},
+        {"sender", "daemon"},
         {"args", ""}
     };
     _send_message(node_id, jmsg.dump());
@@ -249,7 +249,7 @@ void Daemon::list_nodes() try {
 void Daemon::list_ring(const string& node_id) try {
     json jmsg = {
         {"cmd", "list-cmd"},
-        {"sender", "daemon-socket-id"},
+        {"sender", "daemon"},
         {"args", ""}
     };
     _send_message(node_id, jmsg.dump());
@@ -261,7 +261,7 @@ void Daemon::list_ring(const string& node_id) try {
 void Daemon::join(const string& node_id) try {
     json jmsg = {
         {"cmd", "join-cmd"},
-        {"sender", "daemon-socket-id"},
+        {"sender", "daemon"},
         {"args", {
             {"socket_fd", _pick_random_node(node_id)}
         }}
