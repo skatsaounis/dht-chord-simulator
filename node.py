@@ -15,9 +15,9 @@ if len(sys.argv) != 4:
     sys.exit(2)
 
 node = {
-    'n': int(sys.argv[1]),
-    'successor': int(sys.argv[1]),
-    'predecessor': int(sys.argv[1]),
+    'n': sys.argv[1],
+    'successor': sys.argv[1],
+    'predecessor': sys.argv[1],
     'keys': {},
     'replica_factor': int(sys.argv[2]),
     'consistency': sys.argv[3]
@@ -29,7 +29,7 @@ active_sockets = [listening_socket]
 try:
     while True:
         # Create a new connection
-        print("[node-%d] Listening for client requests..." % (node['n']))
+        print("[node-%s] Listening for client requests..." % (node['n']))
         ready_sockets, _, _ = select.select(active_sockets, [], [])
 
         for ready_socket in ready_sockets:
@@ -47,21 +47,21 @@ try:
 
                 # Here we accept messages from daemon
                 if cmd == 'list-cmd':
-                    print('[node-%d] Received daemon list command' % (node['n']))
+                    print('[node-%s] Received daemon list command' % (node['n']))
                     list_cmd(node)
                 elif cmd == 'join-cmd':
-                    print('[node-%d] Received daemon join command' % (node['n']))
+                    print('[node-%s] Received daemon join command' % (node['n']))
                     join_cmd(args, node)
                 elif cmd == 'depart-cmd':
-                    print('[node-%d] Received daemon depart command' % (node['n']))
+                    print('[node-%s] Received daemon depart command' % (node['n']))
                     if node['successor'] != node['n']:
                         depart_cmd(node)
-                    print('[node-%d] Shutting down gracefully...' % (node['n']))
+                    print('[node-%s] Shutting down gracefully...' % (node['n']))
                     for active_socket in active_sockets:
                         active_socket.close()
-                    print('[node-%d] Sockets have been closed' % (node['n']))
+                    print('[node-%s] Sockets have been closed' % (node['n']))
                     os.remove('/var/run/dsemu/' + sys.argv[1])
-                    print('[node-%d] Listening token has been deleted successfuly' % (node['n']))
+                    print('[node-%s] Listening token has been deleted successfuly' % (node['n']))
                     notify_daemon = {
                         'cmd': 'notify-daemon',
                         'action': 'depart'
@@ -69,33 +69,33 @@ try:
                     daemon_socket = create_socket('dsock')
                     daemon_socket.sendall(send_message(notify_daemon))
                     daemon_socket.close()
-                    print('[node-%d] Notified daemon for completion of departure' % (node['n']))
+                    print('[node-%s] Notified daemon for completion of departure' % (node['n']))
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
-                    print('[node-%d] Received insert key command' % (node['n']))
+                    print('[node-%s] Received insert key command' % (node['n']))
                     node = insert_cmd(args, node)
                 elif cmd == 'query-cmd':
-                    print('[node-%d] Received query command' % (node['n']))
+                    print('[node-%s] Received query command' % (node['n']))
                     query_cmd(args, node)
                 elif cmd == 'delete-cmd':
-                    print('[node-%d] Received delete command' % (node['n']))
+                    print('[node-%s] Received delete command' % (node['n']))
                     node = delete_cmd(args, node)
 
                 # Here we accept internode messages
                 elif cmd == 'join':
-                    print('[node-%d] Received join command from %d with type %s' % (node['n'], sender, args['type']))
+                    print('[node-%s] Received join command from %s with type %s' % (node['n'], sender, args['type']))
                     dht_join(args, node)
                 elif cmd == 'depart':
-                    print('[node-%d] Received depart command from %d with type %s' % (node['n'], sender, args['type']))
+                    print('[node-%s] Received depart command from %s with type %s' % (node['n'], sender, args['type']))
                     dht_depart(args, node)
                 elif cmd == 'keys':
-                    print('[node-%d] Received keys from %d' % (node['n'], sender))
+                    print('[node-%s] Received keys from %s' % (node['n'], sender))
                     node = dht_keys(args, node)
                 elif cmd == 'answer':
-                    print('[node-%d] Received answer from %d' % (node['n'], sender))
+                    print('[node-%s] Received answer from %s' % (node['n'], sender))
                     dht_answer(args, sender, node)
                 else:
-                    print('[node-%d] Received unknown response from %d' % (node['n'], sender))
+                    print('[node-%s] Received unknown response from %s' % (node['n'], sender))
 
             except Exception as e:
                 print(e)
@@ -104,12 +104,12 @@ try:
                 conn.close()
 
 except KeyboardInterrupt:
-    print('\n[node-%d] Received keyboard interrupt...' % (node['n']))
-    print('[node-%d] Shutting down gracefully...' % (node['n']))
+    print('\n[node-%s] Received keyboard interrupt...' % (node['n']))
+    print('[node-%s] Shutting down gracefully...' % (node['n']))
 
     for active_socket in active_sockets:
         active_socket.close()
-    print('[node-%d] Sockets have been closed' % (node['n']))
+    print('[node-%s] Sockets have been closed' % (node['n']))
     os.remove('/var/run/dsemu/' + sys.argv[1])
-    print('[node-%d] Listening token has been deleted successfuly' % (node['n']))
+    print('[node-%s] Listening token has been deleted successfuly' % (node['n']))
     sys.exit(130)

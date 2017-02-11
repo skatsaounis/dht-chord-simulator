@@ -7,9 +7,9 @@ def dht_send_keys(node):
 
     for key, value in node['keys'].items():
         if (
-            int(key) <= node['predecessor']
+            key <= node['predecessor']
         ) or (
-            int(key) > node['n']
+            key > node['n']
         ):
             n_keys.update({key: value})
         else:
@@ -38,7 +38,7 @@ def dht_join(args, node):
     if 'sender' in args:
         sender = args['sender']
     if cmd_type == 'find':
-        node_id = int(args['node_id'])
+        node_id = args['node_id']
         if node['successor'] == node['n']:
             join_response = {
                 'cmd': 'join',
@@ -93,7 +93,7 @@ def dht_join(args, node):
             sending_socket.close()
 
     elif cmd_type == 'response':
-        receiver = int(args['receiver'])
+        receiver = args['receiver']
         if receiver != node['n']:
             join_response = {
                 'cmd': 'join',
@@ -135,32 +135,32 @@ def dht_join(args, node):
             sending_socket.close()
 
     elif cmd_type == 'pred':
-        node_id = int(args['node_id'])
+        node_id = args['node_id']
         node['predecessor'] = node_id
         node = dht_send_keys(node)
     elif cmd_type == 'succ':
-        node_id = int(args['node_id'])
+        node_id = args['node_id']
         node['successor'] = node_id
     else:
-        print('[node-%d] Received unknown join type' % (node['n']))
+        print('[node-%s] Received unknown join type' % (node['n']))
     return node
 
 
 def dht_depart(args, node):
     cmd_type = args['type']
     if cmd_type == 'pred':
-        node_id = int(args['node_id'])
+        node_id = args['node_id']
         node['predecessor'] = node_id
     elif cmd_type == 'succ':
-        node_id = int(args['node_id'])
+        node_id = args['node_id']
         node['successor'] = node_id
     else:
-        print('[node-%d] Received unknown depart type' % (node['n']))
+        print('[node-%s] Received unknown depart type' % (node['n']))
     return node
 
 
 def dht_keys(args, node):
-    replica_counter = int(args['replica_counter'])
+    replica_counter = args['replica_counter']
     keys = args['keys']
     cmd_type = args['type']
     initial_sender = args['initial_sender']
@@ -225,22 +225,22 @@ def dht_keys(args, node):
 def dht_answer(args, sender, node):
     cmd_type = args['type']
 
-    print('[node-%d] Answer has been received from node %d' % (node['n'], sender))
+    print('[node-%s] Answer has been received from node %s' % (node['n'], sender))
 
     if cmd_type == 'insert':
-        print('[node-%d] Key has been inserted' % (node['n']))
+        print('[node-%s] Key has been inserted' % (node['n']))
 
     elif cmd_type == 'delete':
         if args['value'] != 'nf':
-            print('[node-%d] %s has been deleted' % (node['n'], args['value']))
+            print('[node-%s] %s has been deleted' % (node['n'], args['value']))
         else:
-            print('[node-%d] Key not found' % (node['n']))
+            print('[node-%s] Key not found' % (node['n']))
 
     elif cmd_type == 'query':
         if args['value'] != 'nf':
-            print('[node-%d] Answer is %s' % (node['n'], args['value']))
+            print('[node-%s] Answer is %s' % (node['n'], args['value']))
         else:
-            print('[node-%d] Key not found' % (node['n']))
+            print('[node-%s] Key not found' % (node['n']))
 
     # notify daemon
     notify_daemon = {
