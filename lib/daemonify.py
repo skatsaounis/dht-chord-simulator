@@ -259,6 +259,7 @@ def delete_cmd(args, node):
 
     if key in node['keys']:
         # delete it from dictionary
+        deleted_value_of_key = node['keys'][key]
         del node['keys'][key]
 
         # first node sends answer to initial sender
@@ -275,7 +276,7 @@ def delete_cmd(args, node):
                 'sender': node['n'],
                 'args': {
                     'type': 'delete',
-                    'value': node['keys'][key]
+                    'value': deleted_value_of_key
                 }
             }
             next_socket = create_socket(initial_sender)

@@ -6,14 +6,16 @@ def dht_send_keys(node):
     rem_keys = {}
 
     for key, value in node['keys'].items():
-        if (
-            key <= node['predecessor']
-        ) or (
-            key > node['n']
-        ):
-            n_keys.update({key: value})
+        if node['predecessor'] < node['n']:
+            if (key > node['predecessor']) and (key <= node['n']):
+                rem_keys.update({key: value})
+            else:
+                n_keys.update({key: value})
         else:
-            rem_keys.update({key: value})
+            if (key <= node['n']) or (key > node['predecessor']):
+                rem_keys.update({key: value})
+            else:
+                n_keys.update({key: value})
 
     node['keys'] = rem_keys
     send_keys = {
