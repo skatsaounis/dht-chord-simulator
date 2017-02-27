@@ -63,14 +63,15 @@ try:
                     debug('[node-%s] Sockets have been closed' % (node['n']))
                     os.remove('/var/run/dsemu/' + sys.argv[1])
                     debug('[node-%s] Listening token has been deleted successfuly' % (node['n']))
-                    notify_daemon = {
-                        'cmd': 'notify-daemon',
-                        'action': 'depart'
-                    }
-                    daemon_socket = create_socket('dsock')
-                    daemon_socket.sendall(send_message(notify_daemon))
-                    daemon_socket.close()
-                    debug('[node-%s] Notified daemon for completion of departure' % (node['n']), node['verbose'])
+                    if node['successor'] == node['n']:
+                        notify_daemon = {
+                            'cmd': 'notify-daemon',
+                            'action': 'depart'
+                        }
+                        daemon_socket = create_socket('dsock')
+                        daemon_socket.sendall(send_message(notify_daemon))
+                        daemon_socket.close()
+                        debug('[node-%s] Notified daemon for completion of departure' % (node['n']), node['verbose'])
                     sys.exit(0)
                 elif cmd == 'insert-cmd':
                     debug('[node-%s] Received insert key command' % (node['n']), node['verbose'])

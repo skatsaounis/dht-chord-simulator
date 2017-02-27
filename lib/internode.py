@@ -187,6 +187,24 @@ def dht_keys(args, node):
             sending_socket = create_socket(node['successor'])
             sending_socket.sendall(send_message(send_keys))
             sending_socket.close()
+        else:
+            notify_daemon = {
+                'cmd': 'notify-daemon',
+                'action': 'depart'
+            }
+            daemon_socket = create_socket('dsock')
+            daemon_socket.sendall(send_message(notify_daemon))
+            daemon_socket.close()
+            debug('[node-%s] Notified daemon for completion of departure' % (node['n']), node['verbose'])
+    elif (cmd_type == 'depart'):
+        notify_daemon = {
+            'cmd': 'notify-daemon',
+            'action': 'depart'
+        }
+        daemon_socket = create_socket('dsock')
+        daemon_socket.sendall(send_message(notify_daemon))
+        daemon_socket.close()
+        debug('[node-%s] Notified daemon for completion of departure' % (node['n']), node['verbose'])
 
     # update keys
     node['keys'].update(keys)
