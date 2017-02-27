@@ -7,3 +7,4 @@ __init__.py
 *.pyc
 test.py
 test2.py
+examples/test_units/time.txt

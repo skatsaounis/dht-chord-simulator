@@ -36,7 +36,7 @@ try:
         for ready_socket in ready_sockets:
             # Get the data
             conn, _ = ready_socket.accept()
-            request_data = conn.recv(1024)
+            request_data = conn.recv(16384)
             # debug('Got message: ' + str(request_data), node['verbose'])
 
             # Get the json object
