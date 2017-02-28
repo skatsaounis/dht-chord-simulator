@@ -2,6 +2,7 @@
 #include "globals.hpp"
 #include "utils.hpp"
 #include "daemon-backend.hpp"
+#include "commands.hpp"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -11,15 +12,17 @@
 #include <memory>
 #include <cstring>
 #include <iostream>
+#include <sstream>
+#include <unordered_map>
+#include <json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
 
 void daemon_main() try {
 
     int ret = daemon(0, 1);
     if (ret == -1) throw system_error(errno, system_category(), "Cannot daemonize process.");
-
-    //redirect log?
 
     int sfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sfd == -1) throw system_error(errno, system_category(), "Cannot create initial socket.");
@@ -35,9 +38,46 @@ void daemon_main() try {
     ret = listen(sfd, 50);
     if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
 
-    //main loop
+    // Main service loop.
+
     Daemon daemon;
-    daemon.init_node(4, 42, "linear");
+    while (daemon.is_running()) try {
+        // Accept incoming connection
+        struct sockaddr_un cliaddr;
+        socklen_t cliaddr_size = sizeof(cliaddr);
+        int csfd = accept(sfd, (struct sockaddr*) &cliaddr, &cliaddr_size);
+        if (csfd == -1) throw system_error(errno, system_category(), "Could not accept incoming connection");        
+        // Receive request
+        stringstream ss;
+        while (true) {
+            char buffer[256];
+            int n_read = read(csfd, buffer, 255);
+            if (n_read < 0) throw system_error(errno, system_category(), "Read error from client socket");
+            if (n_read == 0) break;
+            buffer[n_read] = '\0';
+            string chunk = buffer;
+            ss << chunk;
+        }
+        // Parse request
+        auto vars = json::parse(ss.str());
+        // Process request
+        Commands cmd = to_command_enum(vars.at("cmd"));
+        switch(cmd) {
+            case Commands::Start:
+                daemon.init_node(vars.at("node"), vars.at("replicas"), vars.at("consistency"));
+                break;
+            case Commands::Terminate:
+                //TODO: terminate node
+                cout << "[daemon] Terminating" << endl;
+                daemon.terminate();
+                break;
+            default:
+                break;
+        }
+    } catch (const exception& e) {
+        cerr << "Could not process client request:" << endl;
+        print_exception(e);
+    }
 
     shutdown(sfd, SHUT_RDWR);
     unlink(socket_path.c_str());

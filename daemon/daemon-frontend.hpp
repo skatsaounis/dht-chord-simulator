@@ -1,15 +1,13 @@
 #ifndef _DSEMU_DAEMON_FRONTEND_HPP_
 #define _DSEMU_DAEMON_FRONTEND_HPP_
 
-class Daemon {
-    void* _m_connection = nullptr;
-
-    void _connect();
-    void _disconnect();
+class DaemonInterface {
+    int sfd = 0;
+    bool _m_is_connected = false;
 
 public:
-    Daemon();
-    ~Daemon();
+    DaemonInterface();
+    ~DaemonInterface();
 
     bool isRunning();
     void start();

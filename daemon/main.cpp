@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char** argv) try {
     Options options;
     options.parse(argc, argv);
-    Daemon daemon;
+    DaemonInterface daemon;
     switch (options.command()) {
         case Commands::Status:
             if (daemon.isRunning())
