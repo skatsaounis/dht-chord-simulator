@@ -188,6 +188,7 @@ def query_cmd(args, node):
                     'sender': node['n'],
                     'args': {
                         'type': 'query',
+                        'key': key,
                         'value': node['keys'][key]
                     }
                 }
@@ -202,6 +203,7 @@ def query_cmd(args, node):
                 'sender': node['n'],
                 'args': {
                     'type': 'query',
+                    'key': key,
                     'value': node['keys'][key]
                 }
             }
@@ -223,6 +225,7 @@ def query_cmd(args, node):
             'sender': node['n'],
             'args': {
                 'type': 'query',
+                'key': key,
                 'value': 'nf'
             }
         }
