@@ -9,7 +9,7 @@ for consistency in linear eventual; do
             dsemu join -n ${i}
         done
         for file in insert.txt query.txt; do
-            echo "time for consistency: ${consistency} replica_factor: ${replica_factor} Command-file: ${file}" >> time.txt
+            echo "c: ${consistency} r: ${replica_factor} f: ${file}" >> time.txt
             { time ./test_parser.py ${file} ; } 2>> time.txt
         done
 
@@ -29,7 +29,7 @@ for consistency in linear eventual; do
         dsemu join -n ${i}
     done
 
-    echo "time for consistency: ${consistency} replica_factor: 3 Command-file: requests.txt" >> time.txt
+    echo "c: ${consistency} r: 3 f: requests.txt" >> time.txt
     { time ./test_parser.py requests.txt ; } 2>> time.txt
     dsemu terminate
     echo
