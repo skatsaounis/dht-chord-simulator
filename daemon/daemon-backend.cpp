@@ -64,8 +64,24 @@ void Daemon::_wait_for_notify(Commands command) const try {
         auto msg = get_message();
         auto vars = json::parse(msg);
         if (vars.at("cmd") == "notify-daemon" &&
-            to_command_enum(vars.at("action")) == command)
+            to_command_enum(vars.at("action")) == command) {
+            cout << "[node-" << vars.at("node") << "] Answer has been received from node " << args.at("sender") << endl;
+            if (vars.at("action") == "insert"):
+                cout << "[node-" << vars.at("node") << "] Key has been inserted" << endl;
+            else if (vars.at("action") == "delete") {
+                if (vars.at("args").at("value") != "nf")
+                    cout << "[node-" << vars.at("node") << "] " << vars.at("args").at("key") << " has been deleted" << endl;
+                else
+                    cout << "[node-" << vars.at("node") << "] Key " << vars.at("args").at("key") << " not found" << endl;
+            }
+            else if (vars.at("action") == "query") {
+                if (vars.at("args").at("value") != "nf")
+                    cout << "[node-" << vars.at("node") << "][answer] Key " << vars.at("args").at("key") << " has value " << vars.at("args").at("value") << endl;
+                else:
+                    cout << "[node-" << vars.at("node") << "][answer] Key " << vars.at("args").at("key") << " not found" << endl;
+            }
             break;
+        }
     }
 } catch (const exception&) {
     throw_with_nested(runtime_error("While waiting for command completion notification"));

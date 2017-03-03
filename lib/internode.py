@@ -242,30 +242,14 @@ def dht_keys(args, node):
     return node
 
 
+# notify daemon
 def dht_answer(args, sender, node):
-    cmd_type = args['type']
-
-    debug('[node-%s] Answer has been received from node %s' % (node['n'], sender), node['verbose'])
-
-    if cmd_type == 'insert':
-        debug('[node-%s] Key has been inserted' % (node['n']))
-
-    elif cmd_type == 'delete':
-        if args['value'] != 'nf':
-            debug('[node-%s] %s has been deleted' % (node['n'], args['value']))
-        else:
-            debug('[node-%s] Key not found' % (node['n']))
-
-    elif cmd_type == 'query':
-        if args['value'] != 'nf':
-            debug('[node-%s][answer] Key %s has value %s' % (node['n'], args['key'], args['value']))
-        else:
-            debug('[node-%s][answer] Key %s not found' % (node['n'], args['key']))
-
-    # notify daemon
     notify_daemon = {
         'cmd': 'notify-daemon',
-        'action': cmd_type
+        'action': args['type'],
+        'node': node['n'],
+        'sender': sender,
+        'args': args
     }
 
     daemon_socket = create_socket('dsock')
