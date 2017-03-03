@@ -66,20 +66,20 @@ void Daemon::_wait_for_notify(Commands command) const try {
         if (vars.at("cmd") == "notify-daemon" &&
             to_command_enum(vars.at("action")) == command) {
             if (vars.at("action") != "depart")
-                cout << "[node-" << vars.at("node").dump() << "] Answer has been received from node " << vars.at("sender").dump() << endl;
+                cout << "[node-" << vars.value("node", "") << "] Answer has been received from node " << vars.value("sender", "") << endl;
             if (vars.at("action") == "insert")
-                cout << "[node-" << vars.at("node").dump() << "] Key has been inserted" << endl;
+                cout << "[node-" << vars.value("node", "") << "] Key has been inserted" << endl;
             else if (vars.at("action") == "delete") {
                 if (vars.at("args").at("value") != "nf")
-                    cout << "[node-" << vars.at("node").dump() << "] " << vars.at("args").at("key").dump() << " has been deleted" << endl;
+                    cout << "[node-" << vars.value("node", "") << "] " << vars.at("args").value("key", "") << " has been deleted" << endl;
                 else
-                    cout << "[node-" << vars.at("node").dump() << "] Key " << vars.at("args").at("key").dump() << " not found" << endl;
+                    cout << "[node-" << vars.value("node", "") << "] Key " << vars.at("args").value("key", "") << " not found" << endl;
             }
             else if (vars.at("action") == "query") {
                 if (vars.at("args").at("value") != "nf")
-                    cout << "[node-" << vars.at("node").dump() << "][answer] Key " << vars.at("args").at("key").dump() << " has value " << vars.at("args").at("value").dump() << endl;
+                    cout << "[node-" << vars.value("node", "") << "][answer] Key " << vars.at("args").value("key", "") << " has value " << vars.at("args").value("value", "") << endl;
                 else
-                    cout << "[node-" << vars.at("node").dump() << "][answer] Key " << vars.at("args").at("key").dump() << " not found" << endl;
+                    cout << "[node-" << vars.value("node", "") << "][answer] Key " << vars.at("args").value("key", "") << " not found" << endl;
             }
             break;
         }

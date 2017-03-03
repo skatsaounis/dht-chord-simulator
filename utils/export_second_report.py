@@ -28,4 +28,5 @@ linears = map(lambda x: x[1], filter(lambda x: x[0] == 1, results))
 eventuals = map(lambda x: x[1], filter(lambda x: x[0] == 2, results))
 
 for linear, eventual in zip(linears, eventuals):
-    print('%s %s    %s %s' % (linear[0], linear[1], eventual[0], eventual[1]))
+    if linear[1] != eventual[1]:
+        print('%s %s\t\t\t\t%s %s' % (linear[0], linear[1], eventual[0], eventual[1]))
