@@ -2,6 +2,7 @@
 
 import sys
 from subprocess import call
+from time import sleep
 
 # test_parser.py <file>
 if len(sys.argv) != 2:
@@ -31,5 +32,7 @@ for line in lines:
             call(["dsemu", "query", "-k", key])
     else:
         print('File does not exist or parsing is not supported')
+        sys.exit(2)
+    sleep(0.1)
 
 f.close()

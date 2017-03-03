@@ -258,9 +258,9 @@ def dht_answer(args, sender, node):
 
     elif cmd_type == 'query':
         if args['value'] != 'nf':
-            debug('[node-%s] Key %s has value %s' % (node['n'], args['key'], args['value']))
+            debug('[node-%s][answer] Key %s has value %s' % (node['n'], args['key'], args['value']))
         else:
-            debug('[node-%s] Key %s not found' % (node['n'], args['key']))
+            debug('[node-%s][answer] Key %s not found' % (node['n'], args['key']))
 
     # notify daemon
     notify_daemon = {

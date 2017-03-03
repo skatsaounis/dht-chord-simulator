@@ -21,7 +21,7 @@ done
 
 # requests experiments
 for consistency in linear eventual; do
-    dsemu start
+    dsemu start >>results.txt
     dsemu start -n 1 -r 3 -c ${consistency}
     for i in {2..10}; do
         dsemu start -n ${i} -r 3 -c ${consistency}
