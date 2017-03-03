@@ -66,8 +66,8 @@ void Daemon::_wait_for_notify(Commands command) const try {
         if (vars.at("cmd") == "notify-daemon" &&
             to_command_enum(vars.at("action")) == command) {
             if (vars.at("action") != "depart")
-                cout << "[node-" << vars.at("node") << "] Answer has been received from node " << args.at("sender") << endl;
-            if (vars.at("action") == "insert"):
+                cout << "[node-" << vars.at("node") << "] Answer has been received from node " << vars.at("sender") << endl;
+            if (vars.at("action") == "insert")
                 cout << "[node-" << vars.at("node") << "] Key has been inserted" << endl;
             else if (vars.at("action") == "delete") {
                 if (vars.at("args").at("value") != "nf")
@@ -78,7 +78,7 @@ void Daemon::_wait_for_notify(Commands command) const try {
             else if (vars.at("action") == "query") {
                 if (vars.at("args").at("value") != "nf")
                     cout << "[node-" << vars.at("node") << "][answer] Key " << vars.at("args").at("key") << " has value " << vars.at("args").at("value") << endl;
-                else:
+                else
                     cout << "[node-" << vars.at("node") << "][answer] Key " << vars.at("args").at("key") << " not found" << endl;
             }
             break;
