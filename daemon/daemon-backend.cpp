@@ -65,7 +65,8 @@ void Daemon::_wait_for_notify(Commands command) const try {
         auto vars = json::parse(msg);
         if (vars.at("cmd") == "notify-daemon" &&
             to_command_enum(vars.at("action")) == command) {
-            cout << "[node-" << vars.at("node") << "] Answer has been received from node " << args.at("sender") << endl;
+            if (vars.at("action") != "depart")
+                cout << "[node-" << vars.at("node") << "] Answer has been received from node " << args.at("sender") << endl;
             if (vars.at("action") == "insert"):
                 cout << "[node-" << vars.at("node") << "] Key has been inserted" << endl;
             else if (vars.at("action") == "delete") {
