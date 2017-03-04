@@ -16,7 +16,93 @@
 using namespace std;
 using json = nlohmann::json;
 
-string Daemon::get_message() const {
+
+bool MessageQueue::iterator::is_end() const
+{
+    return _m_is_endit;
+}
+
+MessageQueue::iterator::reference
+MessageQueue::iterator::message()
+{
+    if (!_m_has_message){
+        _m_message = parent._get_message();
+        _m_has_message = true;
+    }
+    return _m_message;
+}
+
+MessageQueue::iterator
+MessageQueue::iterator::createEnd(MessageQueue& parent_queue,
+                                  MessageQueue::iterator::container& msg_queue)
+{
+    auto obj = iterator(parent_queue, msg_queue);
+    obj._m_is_endit = true;
+    return obj;
+}
+
+MessageQueue::iterator::iterator(MessageQueue& parent_queue,
+                                 MessageQueue::iterator::container& msg_queue):
+    parent(parent_queue), mqueue(msg_queue)
+{
+    current = mqueue.begin();
+}
+
+MessageQueue::iterator::~iterator()
+{
+    mqueue.swap(recycled);
+}
+
+bool MessageQueue::iterator::operator==(const iterator& other)
+{
+    if (&parent != &other.parent) return false;
+    if (is_end() && other.is_end())
+        return true;
+    else if (is_end() || other.is_end()) {
+        const iterator& working = (is_end()? other : *this);
+        return working.mqueue.empty() && working.parent.is_open();
+    }
+    else
+        return false;
+}
+
+bool MessageQueue::iterator::operator!=(const iterator& other)
+{
+    return !this->operator==(other);
+}
+
+MessageQueue::iterator&
+MessageQueue::iterator::operator++()
+{
+    if (mqueue.empty())
+        _m_has_message = false;
+    else
+        mqueue.pop_front();
+    return *this;
+}
+
+MessageQueue::iterator::reference
+MessageQueue::iterator::operator*()
+{
+    if (mqueue.empty())
+        return message();
+    else
+        return mqueue.front();
+}
+
+MessageQueue::iterator::pointer
+MessageQueue::iterator::operator->()
+{
+    return &this->operator*();
+}
+
+void MessageQueue::iterator::recycle_message()
+{
+    recycled.emplace_back(this->operator*());
+}
+
+
+string MessageQueue::_get_message() const {
     // Accept incoming connection
     struct sockaddr_un cliaddr;
     socklen_t cliaddr_size = sizeof(cliaddr);
@@ -35,6 +121,61 @@ string Daemon::get_message() const {
     }
     return ss.str();
 }
+
+MessageQueue::~MessageQueue()
+{
+    close();
+}
+
+void MessageQueue::open(std::string sockpath)
+{
+    close();
+    _m_socket_path = sockpath;
+
+    sfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sfd == -1) throw system_error(errno, system_category(), "Cannot create initial socket.");
+
+    struct sockaddr_un saddr;
+    memset(&saddr, 0, sizeof(struct sockaddr_un));
+    saddr.sun_family = AF_UNIX;
+    strncpy(saddr.sun_path, _m_socket_path.c_str(), sizeof(saddr.sun_path) - 1);
+
+    int ret = bind(sfd, (struct sockaddr*) &saddr, sizeof(struct sockaddr_un));
+    if (ret == -1) throw system_error(errno, system_category(), "Cannot bind initial socket to file.");
+
+    ret = listen(sfd, 50);
+    if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
+
+    _m_is_open = true;
+}
+
+void MessageQueue::close()
+{
+    if (!_m_is_open) return;
+
+    shutdown(sfd, SHUT_RDWR);
+    unlink(_m_socket_path.c_str());
+
+    _m_is_open = false;
+}
+
+bool MessageQueue::is_open() const
+{
+    return _m_is_open;
+}
+
+MessageQueue::iterator
+MessageQueue::begin()
+{
+    return iterator(*this, message_queue);
+}
+
+MessageQueue::iterator
+MessageQueue::end()
+{
+    return iterator::createEnd(*this, message_queue);
+}
+
 
 /// Send a message to a node.
 void Daemon::_send_message(const string& node_id, const string& msg) const {
@@ -60,9 +201,8 @@ void Daemon::_send_message(const string& node_id, const string& msg) const {
 /// Block until a notification is sent about
 /// the completion of the specified task.
 void Daemon::_wait_for_notify(Commands command) const try {
-    while(true) {
-        auto msg = get_message();
-        auto vars = json::parse(msg);
+    for (auto it = message_queue.begin(); it != message_queue.end(); ++it) {
+        auto vars = json::parse(*it);
         if (vars.at("cmd") == "notify-daemon" &&
             to_command_enum(vars.at("action")) == command) {
             if (vars.at("action") != "depart")
@@ -83,6 +223,8 @@ void Daemon::_wait_for_notify(Commands command) const try {
             }
             break;
         }
+        else
+            it.recycle_message();
     }
 } catch (const exception&) {
     throw_with_nested(runtime_error("While waiting for command completion notification"));
@@ -141,34 +283,11 @@ string Daemon::_pick_random_node(const string& node_id) try {
     throw_with_nested(runtime_error("While removing node from random selection"));
 }
 
-Daemon::Daemon() {
+Daemon::Daemon()
+{
     int ret = daemon(0, 1);
     if (ret == -1) throw system_error(errno, system_category(), "Cannot daemonize process.");
-
-    sfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sfd == -1) throw system_error(errno, system_category(), "Cannot create initial socket.");
-
-    struct sockaddr_un saddr;
-    memset(&saddr, 0, sizeof(struct sockaddr_un));
-    saddr.sun_family = AF_UNIX;
-    strncpy(saddr.sun_path, socket_path.c_str(), sizeof(saddr.sun_path) - 1);
-
-    ret = bind(sfd, (struct sockaddr*) &saddr, sizeof(struct sockaddr_un));
-    if (ret == -1) throw system_error(errno, system_category(), "Cannot bind initial socket to file.");
-
-    ret = listen(sfd, 50);
-    if (ret == -1) throw system_error(errno, system_category(), "Cannot listen from initial socket.");
-}
-
-Daemon::~Daemon() {
-    shutdown(sfd, SHUT_RDWR);
-    unlink(socket_path.c_str());
-}
-
-/// Check whether the daemon is running,
-/// and able to process requests.
-bool Daemon::is_running() const {
-    return _m_is_running;
+    message_queue.open(socket_path);
 }
 
 /// Get the replica factor for this session.
@@ -188,7 +307,6 @@ void Daemon::set_replica_factor(unsigned r) {
 /// Terminate the daemon instance,
 /// releasing all nodes.
 void Daemon::terminate() {
-    _m_is_running = false;
     // Send termination message to all nodes.
     // Termination sequence will continue regardless of
     // whether the nodes succeed to receive the message.
@@ -198,6 +316,7 @@ void Daemon::terminate() {
         cerr << "Error occured while trying to terminate node " << n.first << " (id: " << n.second << "):" << endl;
         print_exception(e);
     }
+    message_queue.close();
     node_ids.clear();
 }
 

@@ -19,8 +19,7 @@ void daemon_main(bool verbose) try {
     // Main service loop.
     Daemon daemon;
     cout << "[daemon] Starting" << endl;
-    while (daemon.is_running()) try {
-        auto msg = daemon.get_message();
+    for (auto&& msg: daemon.message_queue) try {
         // Parse request
         auto vars = json::parse(msg);
         // Process request
