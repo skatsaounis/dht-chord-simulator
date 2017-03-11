@@ -32,9 +32,8 @@ public:
         MessageQueue& parent;
         container& mqueue;
         container recycled;
-        container::iterator current;
         std::string _m_message;
-        bool _m_has_message;
+        bool _m_has_message = false;
         bool _m_is_endit = false;
 
         bool is_end() const;

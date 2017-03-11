@@ -43,10 +43,7 @@ MessageQueue::iterator::createEnd(MessageQueue& parent_queue,
 
 MessageQueue::iterator::iterator(MessageQueue& parent_queue,
                                  MessageQueue::iterator::container& msg_queue):
-    parent(parent_queue), mqueue(msg_queue)
-{
-    current = mqueue.begin();
-}
+    parent(parent_queue), mqueue(msg_queue) {}
 
 MessageQueue::iterator::~iterator()
 {
@@ -60,7 +57,7 @@ bool MessageQueue::iterator::operator==(const iterator& other)
         return true;
     else if (is_end() || other.is_end()) {
         const iterator& working = (is_end()? other : *this);
-        return working.mqueue.empty() && working.parent.is_open();
+        return working.mqueue.empty() && !working.parent.is_open();
     }
     else
         return false;
