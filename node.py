@@ -4,7 +4,7 @@ import os
 import sys
 import select
 
-from lib.middleware import receive_message, create_socket, send_message, debug
+from lib.middleware import receive_message, create_socket, send_message, hash_fun, debug
 from lib.internode import dht_join, dht_depart, dht_keys, dht_answer
 from lib.daemonify import join_cmd, depart_cmd, list_cmd, insert_cmd, \
     query_cmd, delete_cmd
@@ -23,6 +23,8 @@ node = {
     'consistency': sys.argv[3],
     'verbose': int(sys.argv[4])
 }
+
+node['hash_id'] = hash_fun(node['n'])
 
 listening_socket = create_socket(sys.argv[1], True)
 active_sockets = [listening_socket]
