@@ -1,4 +1,4 @@
-from middleware import create_socket, send_message, debug
+from middleware import create_socket, send_message, hash_fun, debug
 
 
 def join_cmd(args, node):
@@ -55,7 +55,7 @@ def depart_cmd(node):
 
 
 def list_cmd(node):
-    debug('Current node: ' + node['n'])
+    debug('Current node: ' + node['n'] + ' (#' + str(node['hash_id']) + ')')
     if node['n'] == node['predecessor']:
         debug('No other node in the ring', node['verbose'])
     else:
@@ -71,6 +71,9 @@ def insert_cmd(args, node):
     value = args['value']
     sender = args['initial_sender']
 
+    hash_key = hash_fun(key)
+    hash_pred_id = hash_fun(node['predecessor'])
+
     # keep track which node was initially selected by daemon
     if sender == 'daemon':
         initial_sender = node['n']
@@ -78,15 +81,15 @@ def insert_cmd(args, node):
         initial_sender = sender
 
     if (
-        node['n'] == key
+        node['hash_id'] == hash_key
     ) or (
-        node['n'] > key and
-        key > node['predecessor']
+        node['hash_id'] > hash_key and
+        hash_key > hash_pred_id
     ) or (
-        node['n'] < node['predecessor'] and
+        node['hash_id'] < hash_pred_id and
         (
-            (node['n'] < key and key > node['predecessor']) or
-            (node['n'] > key and key < node['predecessor'])
+            (node['hash_id'] < hash_key and hash_key > hash_pred_id) or
+            (node['hash_id'] > hash_key and hash_key < hash_pred_id)
         )
     ) or (
         node['n'] == node['predecessor']

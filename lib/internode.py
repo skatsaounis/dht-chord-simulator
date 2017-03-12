@@ -1,18 +1,21 @@
-from middleware import create_socket, send_message, debug
+from middleware import create_socket, send_message, hash_fun, debug
 
 
 def dht_send_keys(node):
     n_keys = {}
     rem_keys = {}
 
+    hash_pred_id = hash_fun(node['predecessor'])
+
     for key, value in node['keys'].items():
-        if node['predecessor'] < node['n']:
-            if (key > node['predecessor']) and (key <= node['n']):
+        hash_key = hash_fun(key)
+        if hash_pred_id < node['hash_id']:
+            if (hash_key > hash_pred_id) and (hash_key <= node['hash_id']):
                 rem_keys.update({key: value})
             else:
                 n_keys.update({key: value})
         else:
-            if (key <= node['n']) or (key > node['predecessor']):
+            if (hash_key <= node['hash_id']) or (hash_key > hash_pred_id):
                 rem_keys.update({key: value})
             else:
                 n_keys.update({key: value})
@@ -41,6 +44,8 @@ def dht_join(args, node):
         sender = args['sender']
     if cmd_type == 'find':
         node_id = args['node_id']
+        hash_node_id = hash_fun(node_id)
+        hash_succ_id = hash_fun(node['successor'])
         if node['successor'] == node['n']:
             join_response = {
                 'cmd': 'join',
@@ -57,14 +62,14 @@ def dht_join(args, node):
             sending_socket.close()
         elif (
             (
-                node['n'] < node_id and
-                node_id < node['successor']
+                node['hash_id'] < hash_node_id and
+                hash_node_id < hash_succ_id
             ) or (
-                node['n'] > node['successor'] and
-                node_id < node['successor']
+                node['hash_id'] > hash_succ_id and
+                hash_node_id < hash_succ_id
             ) or (
-                node['n'] > node['successor'] and
-                node_id > node['n']
+                node['hash_id'] > hash_succ_id and
+                hash_node_id > node['hash_id']
             )
         ):
             join_response = {
