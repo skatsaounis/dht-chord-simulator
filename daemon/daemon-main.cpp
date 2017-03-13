@@ -19,7 +19,8 @@ void daemon_main(bool verbose) try {
     // Main service loop.
     Daemon daemon;
     cout << "[daemon] Starting" << endl;
-    for (auto&& msg: daemon.message_queue) try {
+    for (auto it = daemon.message_queue.begin(); it != daemon.message_queue.end(); ++it) try {
+        auto& msg = *it;
         // Parse request
         auto vars = json::parse(msg);
         // Process request
@@ -72,6 +73,7 @@ void daemon_main(bool verbose) try {
                 daemon.remove(vars.at("key"));
                 break;
             default:
+                it.recycle_message();
                 break;
         }
     } catch (const exception& e) {

@@ -7,6 +7,7 @@
 #include <sys/un.h>
 #include <sstream>
 #include <string>
+#include <algorithm>
 #include <random>
 #include <iostream>
 #include <cstring>
@@ -34,20 +35,25 @@ MessageQueue::iterator::message()
 
 MessageQueue::iterator
 MessageQueue::iterator::createEnd(MessageQueue& parent_queue,
-                                  MessageQueue::iterator::container& msg_queue)
+                                  MessageQueue::iterator::container& msg_queue,
+                                  MessageQueue::iterator::container& recycled_queue)
 {
-    auto obj = iterator(parent_queue, msg_queue);
+    auto obj = iterator(parent_queue, msg_queue, recycled_queue);
     obj._m_is_endit = true;
     return obj;
 }
 
 MessageQueue::iterator::iterator(MessageQueue& parent_queue,
-                                 MessageQueue::iterator::container& msg_queue):
-    parent(parent_queue), mqueue(msg_queue) {}
+                                 MessageQueue::iterator::container& msg_queue,
+                                 MessageQueue::iterator::container& recycled_queue):
+    parent(parent_queue), mqueue(msg_queue), recycled(recycled_queue)
+{
+    move(recycled.begin(), recycled.end(), back_inserter(mqueue));
+}
 
 MessageQueue::iterator::~iterator()
 {
-    mqueue.swap(recycled);
+    move(recycled.begin(), recycled.end(), back_inserter(mqueue));
 }
 
 bool MessageQueue::iterator::operator==(const iterator& other)
@@ -164,13 +170,13 @@ bool MessageQueue::is_open() const
 MessageQueue::iterator
 MessageQueue::begin()
 {
-    return iterator(*this, message_queue);
+    return iterator(*this, message_queue, recycled_messages);
 }
 
 MessageQueue::iterator
 MessageQueue::end()
 {
-    return iterator::createEnd(*this, message_queue);
+    return iterator::createEnd(*this, message_queue, recycled_messages);
 }
 
 

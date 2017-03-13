@@ -12,6 +12,7 @@ class MessageQueue {
     int sfd = 0;
     std::string _m_socket_path;
     std::deque<std::string> message_queue;
+    std::deque<std::string> recycled_messages;
 
     std::string _get_message() const;
 
@@ -31,7 +32,7 @@ public:
     private:
         MessageQueue& parent;
         container& mqueue;
-        container recycled;
+        container& recycled;
         std::string _m_message;
         bool _m_has_message = false;
         bool _m_is_endit = false;
@@ -40,9 +41,9 @@ public:
         reference message();
 
     public:
-        static iterator createEnd(MessageQueue& parent_queue, container& msg_queue);
+        static iterator createEnd(MessageQueue& parent_queue, container& msg_queue, container& recycled_queue);
 
-        iterator(MessageQueue& parent_queue, container& msg_queue);
+        iterator(MessageQueue& parent_queue, container& msg_queue, container& recycled_queue);
         ~iterator();
 
         bool operator==(const iterator&);
